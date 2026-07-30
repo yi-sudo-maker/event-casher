@@ -1,1 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>準備金電卓</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; background: #f5f5f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+  .card { background: #fff; border-radius: 16px; padding: 2rem; width: 100%; max-width: 420px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  h1 { font-size: 16px; font-weight: 500; color: #888; margin-bottom: 1.5rem; }
+  .denom-row { display: flex; align-items: center; gap: 12px; background: #f9f9f7; border: 1px solid #e8e8e4; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+  .icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .icon-5000 { background: #EEEDFE; color: #3C3489; }
+  .icon-1000 { background: #E1F5EE; color: #085041; }
+  .icon-500  { background: #FAEEDA; color: #633806; }
+  .label { flex: 1; }
+  .label-name { font-size: 15px; font-weight: 500; color: #1a1a1a; }
+  .label-count { font-size: 12px; color: #999; margin-top: 2px; }
+  .ctrl { display: flex; align-items: center; gap: 6px; }
+  .btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; }
+  .btn:hover { background: #f0f0ec; }
+  .btn:active { transform: scale(0.95); }
+  input[type=number] { width: 54px; text-align: center; font-size: 16px; font-weight: 500; border: 1px solid #ddd; border-radius: 8px; padding: 5px 4px; background: #fff; color: #1a1a1a; -moz-appearance: textfield; }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus { outline: none; border-color: #7F77DD; }
+  .subtotal { font-size: 13px; color: #666; min-width: 70px; text-align: right; }
+  .total-box { background: #1a1a1a; color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin: 1.25rem 0 0.75rem; }
+  .total-label { font-size: 14px; color: #aaa; }
+  .total-val { font-size: 28px; font-weight: 500; }
+  .reset { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: transparent; color: #999; font-size: 14px; cursor: pointer; font-family: inherit; }
+  .reset:hover { background: #f5f5f0; color: #333; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>準備金 電卓</h1>
 
+  <div class="denom-row">
+    <div class="icon icon-5000">5000</div>
+    <div class="label">
+      <div class="label-name">5,000円</div>
+      <div class="label-count" id="sub-5000">0枚</div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" onclick="change(5000,-1)">−</button>
+      <input type="number" id="cnt-5000" value="0" min="0" oninput="update()">
+      <button class="btn" onclick="change(5000,1)">＋</button>
+    </div>
+    <span class="subtotal" id="st-5000">¥0</span>
+  </div>
+
+  <div class="denom-row">
+    <div class="icon icon-1000">1000</div>
+    <div class="label">
+      <div class="label-name">1,000円</div>
+      <div class="label-count" id="sub-1000">0枚</div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" onclick="change(1000,-1)">−</button>
+      <input type="number" id="cnt-1000" value="0" min="0" oninput="update()">
+      <button class="btn" onclick="change(1000,1)">＋</button>
+    </div>
+    <span class="subtotal" id="st-1000">¥0</span>
+  </div>
+
+  <div class="denom-row">
+    <div class="icon icon-500">500</div>
+    <div class="label">
+      <div class="label-name">500円</div>
+      <div class="label-count" id="sub-500">0枚</div>
+    </div>
+    <div class="ctrl">
+      <button class="btn" onclick="change(500,-1)">−</button>
+      <input type="number" id="cnt-500" value="0" min="0" oninput="update()">
+      <button class="btn" onclick="change(500,1)">＋</button>
+    </div>
+    <span class="subtotal" id="st-500">¥0</span>
+  </div>
+
+  <div class="total-box">
+    <span class="total-label">合計金額</span>
+    <span class="total-val" id="grand-total">¥0</span>
+  </div>
+
+  <button class="reset" onclick="reset()">リセット</button>
+</div>
+
+<script>
+const denoms = [5000, 1000, 500];
+
+function val(d) {
+  return Math.max(0, parseInt(document.getElementById('cnt-' + d).value) || 0);
+}
+
+function fmt(n) {
+  return '¥' + n.toLocaleString('ja-JP');
+}
+
+function update() {
+  let total = 0;
+  denoms.forEach(d => {
+    const n = val(d);
+    const sub = n * d;
+    total += sub;
+    document.getElementById('st-' + d).textContent = fmt(sub);
+    document.getElementById('sub-' + d).textContent = n + '枚';
+  });
+  document.getElementById('grand-total').textContent = fmt(total);
+}
+
+function change(d, delta) {
+  const el = document.getElementById('cnt-' + d);
+  el.value = Math.max(0, val(d) + delta);
+  update();
+}
+
+function reset() {
+  denoms.forEach(d => {
+    document.getElementById('cnt-' + d).value = 0;
+    document.getElementById('st-' + d).textContent = '¥0';
+    document.getElementById('sub-' + d).textContent = '0枚';
+  });
+  document.getElementById('grand-total').textContent = '¥0';
+}
+</script>
+</body>
+</html>
