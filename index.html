@@ -5,43 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>準備金電卓</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; background: #f5f5f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-  .card { background: #fff; border-radius: 16px; padding: 2rem; width: 100%; max-width: 420px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-  h1 { font-size: 16px; font-weight: 500; color: #888; margin-bottom: 1.5rem; }
-  .denom-row { display: flex; align-items: center; gap: 12px; background: #f9f9f7; border: 1px solid #e8e8e4; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
-  .icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
-  .icon-5000 { background: #EEEDFE; color: #3C3489; }
-  .icon-1000 { background: #E1F5EE; color: #085041; }
-  .icon-500  { background: #FAEEDA; color: #633806; }
-  .label { flex: 1; }
-  .label-name { font-size: 15px; font-weight: 500; color: #1a1a1a; }
-  .label-count { font-size: 12px; color: #999; margin-top: 2px; }
-  .ctrl { display: flex; align-items: center; gap: 6px; }
-  .btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #333; }
-  .btn:hover { background: #f0f0ec; }
-  .btn:active { transform: scale(0.95); }
-  input[type=number] { width: 54px; text-align: center; font-size: 16px; font-weight: 500; border: 1px solid #ddd; border-radius: 8px; padding: 5px 4px; background: #fff; color: #1a1a1a; -moz-appearance: textfield; }
-  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input[type=number]:focus { outline: none; border-color: #7F77DD; }
-  .subtotal { font-size: 13px; color: #666; min-width: 70px; text-align: right; }
-  .total-box { background: #1a1a1a; color: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; margin: 1.25rem 0 0.75rem; }
-  .total-label { font-size: 14px; color: #aaa; }
-  .total-val { font-size: 28px; font-weight: 500; }
-  .reset { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: transparent; color: #999; font-size: 14px; cursor: pointer; font-family: inherit; }
-  .reset:hover { background: #f5f5f0; color: #333; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;background:#f5f5f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1rem;gap:1rem}
+.card{background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:420px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+h1{font-size:16px;font-weight:500;color:#888;margin-bottom:1.25rem}
+/* 準備金 */
+.denom-row{display:flex;align-items:center;gap:10px;background:#f9f9f7;border:1px solid #e8e8e4;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.icon-5000{background:#EEEDFE;color:#3C3489}
+.icon-1000{background:#E1F5EE;color:#085041}
+.icon-500{background:#FAEEDA;color:#633806}
+.label{flex:1}
+.label-name{font-size:15px;font-weight:500;color:#1a1a1a}
+.label-count{font-size:12px;color:#999;margin-top:2px}
+.ctrl{display:flex;align-items:center;gap:6px}
+.btn{width:32px;height:32px;border-radius:8px;border:1px solid #ddd;background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#333;flex-shrink:0}
+.btn:active{transform:scale(0.95)}
+input[type=number]{width:54px;text-align:center;font-size:16px;font-weight:500;border:1px solid #ddd;border-radius:8px;padding:5px 4px;background:#fff;color:#1a1a1a;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+input[type=number]:focus{outline:none;border-color:#7F77DD}
+.subtotal{font-size:13px;color:#666;min-width:70px;text-align:right}
+.total-box{background:#1a1a1a;color:#fff;border-radius:12px;padding:1.1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin:1rem 0 0.75rem}
+.total-label{font-size:14px;color:#aaa}
+.total-val{font-size:28px;font-weight:500}
+.reset{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;background:transparent;color:#999;font-size:14px;cursor:pointer;font-family:inherit}
+/* チケット */
+.ticket-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ticket-label{font-size:13px;color:#555;width:52px;flex-shrink:0}
+.ticket-input{flex:1;font-size:16px;font-weight:500;border:1px solid #ddd;border-radius:8px;padding:8px 10px;color:#1a1a1a;-moz-appearance:textfield}
+.ticket-input::-webkit-inner-spin-button,.ticket-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.ticket-input:focus{outline:none;border-color:#7F77DD}
+.ticket-diff{font-size:13px;color:#666;min-width:64px;text-align:right}
+.add-btn{padding:8px 14px;border-radius:8px;border:none;background:#7F77DD;color:#fff;font-size:14px;cursor:pointer;flex-shrink:0;font-family:inherit}
+.add-btn:active{opacity:0.8}
+.history{margin:0 0 10px;padding:0;list-style:none}
+.history li{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#555;padding:6px 10px;background:#f9f9f7;border-radius:8px;margin-bottom:4px}
+.history li .h-no{color:#aaa;margin-right:6px;font-size:11px}
+.history li .h-num{font-weight:500}
+.history li .h-diff{color:#7F77DD;font-weight:500}
+.history li .del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:0 0 0 8px}
+.ticket-total-box{background:#3C3489;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin:0.75rem 0 0.75rem}
+.ticket-total-label{font-size:14px;color:rgba(255,255,255,0.6)}
+.ticket-total-val{font-size:28px;font-weight:500}
+.divider{border:none;border-top:1px solid #eee;margin:0.25rem 0 1rem}
 </style>
 </head>
 <body>
+
+<!-- 準備金 カード -->
 <div class="card">
   <h1>準備金 電卓</h1>
 
   <div class="denom-row">
     <div class="icon icon-5000">5000</div>
-    <div class="label">
-      <div class="label-name">5,000円</div>
-      <div class="label-count" id="sub-5000">0枚</div>
-    </div>
+    <div class="label"><div class="label-name">5,000円</div><div class="label-count" id="sub-5000">0枚</div></div>
     <div class="ctrl">
       <button class="btn" onclick="change(5000,-1)">−</button>
       <input type="number" id="cnt-5000" value="0" min="0" oninput="update()">
@@ -52,10 +69,7 @@
 
   <div class="denom-row">
     <div class="icon icon-1000">1000</div>
-    <div class="label">
-      <div class="label-name">1,000円</div>
-      <div class="label-count" id="sub-1000">0枚</div>
-    </div>
+    <div class="label"><div class="label-name">1,000円</div><div class="label-count" id="sub-1000">0枚</div></div>
     <div class="ctrl">
       <button class="btn" onclick="change(1000,-1)">−</button>
       <input type="number" id="cnt-1000" value="0" min="0" oninput="update()">
@@ -66,10 +80,7 @@
 
   <div class="denom-row">
     <div class="icon icon-500">500</div>
-    <div class="label">
-      <div class="label-name">500円</div>
-      <div class="label-count" id="sub-500">0枚</div>
-    </div>
+    <div class="label"><div class="label-name">500円</div><div class="label-count" id="sub-500">0枚</div></div>
     <div class="ctrl">
       <button class="btn" onclick="change(500,-1)">−</button>
       <input type="number" id="cnt-500" value="0" min="0" oninput="update()">
@@ -82,46 +93,131 @@
     <span class="total-label">合計金額</span>
     <span class="total-val" id="grand-total">¥0</span>
   </div>
+  <button class="reset" onclick="resetCash()">リセット</button>
+</div>
 
-  <button class="reset" onclick="reset()">リセット</button>
+<!-- チケット カード -->
+<div class="card">
+  <h1>チケット枚数</h1>
+
+  <div class="ticket-row">
+    <span class="ticket-label">スタート</span>
+    <input type="number" class="ticket-input" id="t-start" placeholder="開始番号" min="0" oninput="ticketUpdate()">
+  </div>
+
+  <hr class="divider">
+
+  <!-- 現在の履歴 -->
+  <ul class="history" id="t-history"></ul>
+
+  <div class="ticket-row">
+    <span class="ticket-label">現在</span>
+    <input type="number" class="ticket-input" id="t-current" placeholder="現在の番号" min="0">
+    <button class="add-btn" onclick="addCurrent()">記録</button>
+  </div>
+
+  <hr class="divider">
+
+  <div class="ticket-row">
+    <span class="ticket-label">ラスト</span>
+    <input type="number" class="ticket-input" id="t-last" placeholder="最終番号" min="0" oninput="ticketUpdate()">
+  </div>
+
+  <div class="ticket-total-box">
+    <span class="ticket-total-label">打った枚数（合計）</span>
+    <span class="ticket-total-val" id="t-total">— 枚</span>
+  </div>
+  <button class="reset" onclick="resetTicket()">リセット</button>
 </div>
 
 <script>
+/* ===== 準備金 ===== */
 const denoms = [5000, 1000, 500];
-
-function val(d) {
-  return Math.max(0, parseInt(document.getElementById('cnt-' + d).value) || 0);
-}
-
-function fmt(n) {
-  return '¥' + n.toLocaleString('ja-JP');
-}
-
-function update() {
-  let total = 0;
-  denoms.forEach(d => {
-    const n = val(d);
-    const sub = n * d;
-    total += sub;
-    document.getElementById('st-' + d).textContent = fmt(sub);
-    document.getElementById('sub-' + d).textContent = n + '枚';
+function val(d){return Math.max(0,parseInt(document.getElementById('cnt-'+d).value)||0)}
+function fmt(n){return '¥'+n.toLocaleString('ja-JP')}
+function update(){
+  let total=0;
+  denoms.forEach(d=>{
+    const n=val(d),sub=n*d;
+    total+=sub;
+    document.getElementById('st-'+d).textContent=fmt(sub);
+    document.getElementById('sub-'+d).textContent=n+'枚';
   });
-  document.getElementById('grand-total').textContent = fmt(total);
+  document.getElementById('grand-total').textContent=fmt(total);
 }
-
-function change(d, delta) {
-  const el = document.getElementById('cnt-' + d);
-  el.value = Math.max(0, val(d) + delta);
+function change(d,delta){
+  const el=document.getElementById('cnt-'+d);
+  el.value=Math.max(0,val(d)+delta);
   update();
 }
-
-function reset() {
-  denoms.forEach(d => {
-    document.getElementById('cnt-' + d).value = 0;
-    document.getElementById('st-' + d).textContent = '¥0';
-    document.getElementById('sub-' + d).textContent = '0枚';
+function resetCash(){
+  denoms.forEach(d=>{
+    document.getElementById('cnt-'+d).value=0;
+    document.getElementById('st-'+d).textContent='¥0';
+    document.getElementById('sub-'+d).textContent='0枚';
   });
-  document.getElementById('grand-total').textContent = '¥0';
+  document.getElementById('grand-total').textContent='¥0';
+}
+
+/* ===== チケット ===== */
+let history=[];
+
+function getStart(){return parseInt(document.getElementById('t-start').value)||null}
+function getLast(){return parseInt(document.getElementById('t-last').value)||null}
+
+function prevNum(idx){
+  if(idx===0) return getStart();
+  return history[idx-1].num;
+}
+
+function renderHistory(){
+  const ul=document.getElementById('t-history');
+  ul.innerHTML='';
+  history.forEach((entry,i)=>{
+    const prev=prevNum(i);
+    const diff=(prev!=null)?'+' + (entry.num - prev)+'枚':'';
+    const li=document.createElement('li');
+    li.innerHTML=`<span><span class="h-no">#${i+1}</span><span class="h-num">${entry.num}</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
+    ul.appendChild(li);
+  });
+  ticketUpdate();
+}
+
+function addCurrent(){
+  const el=document.getElementById('t-current');
+  const num=parseInt(el.value);
+  if(isNaN(num)) return;
+  history.push({num});
+  el.value='';
+  renderHistory();
+}
+
+function removeHistory(i){
+  history.splice(i,1);
+  renderHistory();
+}
+
+function ticketUpdate(){
+  const start=getStart();
+  const last=getLast();
+  const totalEl=document.getElementById('t-total');
+  if(start!=null && last!=null && last>=start){
+    totalEl.textContent=(last-start)+'枚';
+  } else if(start!=null && last==null && history.length>0){
+    const latest=history[history.length-1].num;
+    totalEl.textContent=(latest-start)+'枚';
+  } else {
+    totalEl.textContent='— 枚';
+  }
+}
+
+function resetTicket(){
+  history=[];
+  document.getElementById('t-start').value='';
+  document.getElementById('t-current').value='';
+  document.getElementById('t-last').value='';
+  document.getElementById('t-history').innerHTML='';
+  document.getElementById('t-total').textContent='— 枚';
 }
 </script>
 </body>
