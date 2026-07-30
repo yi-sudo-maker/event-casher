@@ -87,42 +87,27 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .close-day-btn{width:100%;padding:16px;border-radius:14px;border:none;background:#1a1a1a;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.02em}
 .close-day-btn:active{opacity:0.8}
 .close-day-wrap{width:100%;max-width:420px;padding-bottom:1.5rem}
-/* PIN */
-.pin-screen{position:fixed;inset:0;background:#f5f5f0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
+/* ロック画面 */
+.pin-screen{position:fixed;inset:0;background:#f5f5f0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;padding:2rem}
 .pin-screen.hidden{display:none}
 .pin-title{font-size:22px;font-weight:700;color:#1a1a1a}
-.pin-sub{font-size:13px;color:#aaa}
-.pin-display{font-size:28px;font-weight:600;color:#1a1a1a;letter-spacing:6px;min-height:44px;min-width:120px;text-align:center}
+.pin-sub{font-size:13px;color:#aaa;text-align:center}
 .pin-error{font-size:13px;color:#c62828;min-height:18px}
-.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
-.pin-key{width:72px;height:72px;border-radius:50%;border:none;background:#fff;font-size:22px;font-weight:500;color:#1a1a1a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-family:inherit}
-.pin-key:active{background:#EEEDFE;transform:scale(0.94)}
-.pin-key.del{font-size:18px;color:#888}
-.pin-key.empty{background:transparent;box-shadow:none;cursor:default}
+.key-input{font-size:18px;font-weight:500;border:1px solid #ddd;border-radius:12px;padding:12px 16px;color:#1a1a1a;width:100%;max-width:280px;font-family:inherit;text-align:center;background:#fff}
+.key-input:focus{outline:none;border-color:#7F77DD}
+.key-submit{padding:13px 40px;border-radius:12px;border:none;background:#7F77DD;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;max-width:280px}
+.key-submit:active{opacity:0.85}
 </style>
 </head>
 <body>
 
-<!-- PIN ロック画面 -->
+<!-- ロック画面 -->
 <div class="pin-screen" id="pin-screen">
   <div class="pin-title">🔐 認証</div>
-  <div class="pin-sub">PINコードを入力してください</div>
-  <div class="pin-display" id="pin-display">—</div>
+  <div class="pin-sub">アクセスキーを入力してください</div>
+  <input type="password" class="key-input" id="key-input" placeholder="アクセスキー" onkeydown="if(event.key==='Enter')checkKey()">
   <div class="pin-error" id="pin-error"></div>
-  <div class="pin-pad">
-    <button class="pin-key" onclick="pinKey('1')">1</button>
-    <button class="pin-key" onclick="pinKey('2')">2</button>
-    <button class="pin-key" onclick="pinKey('3')">3</button>
-    <button class="pin-key" onclick="pinKey('4')">4</button>
-    <button class="pin-key" onclick="pinKey('5')">5</button>
-    <button class="pin-key" onclick="pinKey('6')">6</button>
-    <button class="pin-key" onclick="pinKey('7')">7</button>
-    <button class="pin-key" onclick="pinKey('8')">8</button>
-    <button class="pin-key" onclick="pinKey('9')">9</button>
-    <button class="pin-key del" onclick="pinDel()">⌫</button>
-    <button class="pin-key" onclick="pinKey('0')">0</button>
-    <button class="pin-key" style="font-size:14px;background:#7F77DD;color:#fff" onclick="checkPin()">OK</button>
-  </div>
+  <button class="key-submit" onclick="checkKey()">解錠</button>
 </div>
 
 <div class="modal-overlay" id="settings-overlay" onclick="overlayClick(event)">
@@ -139,9 +124,9 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
       </div>
     </div>
     <div class="setting-row">
-      <div class="setting-label">PINコード（4桁）</div>
+      <div class="setting-label">アクセスキー（変更する場合のみ入力）</div>
       <div class="setting-input-wrap">
-        <input type="number" class="setting-input" id="setting-pin" placeholder="1234" min="0">
+        <input type="text" class="setting-input" id="setting-pin" placeholder="新しいキーを入力">
       </div>
     </div>
     <button class="save-btn" onclick="saveSettings()">保存</button>
@@ -410,44 +395,48 @@ function loadDateData(key){
   return true;
 }
 
-/* ===== PIN ===== */
-const PIN_KEY='event-casher-pin';
-let pinBuffer='';
-function getPin(){ return localStorage.getItem(PIN_KEY)||'1234'; }
-function pinKey(d){
-  pinBuffer+=d;
-  updatePinDisplay();
+/* ===== 認証 ===== */
+const SECRET_KEY_STORE='ec-secret-key';
+const AUTH_TOKEN_STORE='ec-auth-token';
+function getSecret(){ return localStorage.getItem(SECRET_KEY_STORE)||'casher'; }
+function makeToken(key){ return 'ok:'+btoa(unescape(encodeURIComponent(key))); }
+function isAuthed(){ return localStorage.getItem(AUTH_TOKEN_STORE)===makeToken(getSecret()); }
+function grantAuth(){
+  localStorage.setItem(AUTH_TOKEN_STORE,makeToken(getSecret()));
+  document.getElementById('pin-screen').classList.add('hidden');
 }
-function pinDel(){
-  pinBuffer=pinBuffer.slice(0,-1);
-  updatePinDisplay();
-  document.getElementById('pin-error').textContent='';
-}
-function updatePinDisplay(){
-  const el=document.getElementById('pin-display');
-  el.textContent=pinBuffer.length>0?'●'.repeat(pinBuffer.length):'—';
-}
-function checkPin(){
-  if(pinBuffer===getPin()){
-    sessionStorage.setItem('pin-ok','1');
-    document.getElementById('pin-screen').classList.add('hidden');
+function checkKey(){
+  const input=document.getElementById('key-input').value;
+  if(input===getSecret()){
+    grantAuth();
   } else {
-    document.getElementById('pin-error').textContent='PINが違います';
-    pinBuffer='';
-    updatePinDisplay();
+    document.getElementById('pin-error').textContent='キーが違います';
+    document.getElementById('key-input').value='';
+    document.getElementById('key-input').focus();
   }
 }
-function initPin(){
-  if(sessionStorage.getItem('pin-ok')==='1'){
-    document.getElementById('pin-screen').classList.add('hidden');
+function initAuth(){
+  // URLハッシュでの即時認証
+  const hash=decodeURIComponent(location.hash.slice(1));
+  if(hash && hash===getSecret()){
+    grantAuth();
+    history.replaceState(null,'',location.pathname);
+    return;
   }
+  // localStorage永続セッション
+  if(isAuthed()){
+    document.getElementById('pin-screen').classList.add('hidden');
+    return;
+  }
+  // 未認証 → ロック画面表示、キーボード表示
+  setTimeout(()=>document.getElementById('key-input').focus(),100);
 }
 
 /* ===== 設定 ===== */
 let ticketPrice=1500;
 function openSettings(){
   document.getElementById('setting-price').value=ticketPrice;
-  document.getElementById('setting-pin').value=getPin();
+  document.getElementById('setting-pin').value='';
   document.getElementById('settings-overlay').classList.add('open');
 }
 function closeSettings(){
@@ -464,8 +453,10 @@ function saveSettings(){
     ticketUpdate();
   }
   const p=document.getElementById('setting-pin').value.trim();
-  if(p.length>0&&/^\d+$/.test(p)){
-    localStorage.setItem(PIN_KEY,p);
+  if(p.length>0){
+    localStorage.setItem(SECRET_KEY_STORE,p);
+    // キー変更後も現在のデバイスは認証済みに更新
+    localStorage.setItem(AUTH_TOKEN_STORE,makeToken(p));
   }
   closeSettings();
   autoSave();
@@ -690,7 +681,7 @@ function closeDay(){
 }
 
 /* ===== 初期化 ===== */
-initPin();
+initAuth();
 document.getElementById('today-date-display').textContent=getViewDisplay();
 document.getElementById('next-btn').disabled=false;
 const hadData=loadDateData(getViewKey());
