@@ -40,8 +40,10 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .add-btn:active{opacity:0.8}
 .history{margin:0 0 10px;padding:0;list-style:none}
 .history li{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#555;padding:6px 10px;background:#f9f9f7;border-radius:8px;margin-bottom:4px}
-.history li .h-no{color:#aaa;margin-right:6px;font-size:11px}
-.history li .h-num{font-weight:500}
+.history li .h-left{display:flex;flex-direction:column;gap:2px}
+.history li .h-no{color:#aaa;font-size:11px}
+.history li .h-num{font-weight:500;font-size:15px}
+.history li .h-time{color:#bbb;font-size:10px}
 .history li .h-diff{color:#7F77DD;font-weight:500}
 .history li .del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:0 0 0 8px}
 .ticket-total-box{background:#3C3489;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin:0.75rem 0 0.75rem}
@@ -61,7 +63,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <div class="label"><div class="label-name">5,000円</div><div class="label-count" id="sub-5000">0枚</div></div>
     <div class="ctrl">
       <button class="btn" onclick="change(5000,-1)">−</button>
-      <input type="number" id="cnt-5000" value="0" min="0" oninput="update()">
+      <input type="number" id="cnt-5000" placeholder="0" min="0" oninput="update()">
       <button class="btn" onclick="change(5000,1)">＋</button>
     </div>
     <span class="subtotal" id="st-5000">¥0</span>
@@ -72,7 +74,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <div class="label"><div class="label-name">1,000円</div><div class="label-count" id="sub-1000">0枚</div></div>
     <div class="ctrl">
       <button class="btn" onclick="change(1000,-1)">−</button>
-      <input type="number" id="cnt-1000" value="0" min="0" oninput="update()">
+      <input type="number" id="cnt-1000" placeholder="0" min="0" oninput="update()">
       <button class="btn" onclick="change(1000,1)">＋</button>
     </div>
     <span class="subtotal" id="st-1000">¥0</span>
@@ -83,7 +85,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <div class="label"><div class="label-name">500円</div><div class="label-count" id="sub-500">0枚</div></div>
     <div class="ctrl">
       <button class="btn" onclick="change(500,-1)">−</button>
-      <input type="number" id="cnt-500" value="0" min="0" oninput="update()">
+      <input type="number" id="cnt-500" placeholder="0" min="0" oninput="update()">
       <button class="btn" onclick="change(500,1)">＋</button>
     </div>
     <span class="subtotal" id="st-500">¥0</span>
@@ -152,7 +154,7 @@ function change(d,delta){
 }
 function resetCash(){
   denoms.forEach(d=>{
-    document.getElementById('cnt-'+d).value=0;
+    document.getElementById('cnt-'+d).value='';
     document.getElementById('st-'+d).textContent='¥0';
     document.getElementById('sub-'+d).textContent='0枚';
   });
@@ -177,7 +179,7 @@ function renderHistory(){
     const prev=prevNum(i);
     const diff=(prev!=null)?'+' + (entry.num - prev)+'枚':'';
     const li=document.createElement('li');
-    li.innerHTML=`<span><span class="h-no">#${i+1}</span><span class="h-num">${entry.num}</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
+    li.innerHTML=`<span class="h-left"><span class="h-no">#${i+1} ${entry.time}</span><span class="h-num">${entry.num}</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
     ul.appendChild(li);
   });
   ticketUpdate();
@@ -187,7 +189,9 @@ function addCurrent(){
   const el=document.getElementById('t-current');
   const num=parseInt(el.value);
   if(isNaN(num)) return;
-  history.push({num});
+  const now=new Date();
+  const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  history.push({num,time});
   el.value='';
   renderHistory();
 }
