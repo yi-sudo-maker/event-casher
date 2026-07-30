@@ -143,26 +143,6 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <button class="reset" onclick="resetCash()">リセット</button>
 </div>
 
-<!-- カウンター カード -->
-<div class="card">
-  <h1>外国人カウンター</h1>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-    <div>
-      <div style="font-size:11px;color:#aaa;margin-bottom:4px">カウンター 1</div>
-      <input type="number" class="ticket-input" id="cnt-a" placeholder="0" min="0" oninput="cntUpdate()">
-    </div>
-    <div>
-      <div style="font-size:11px;color:#aaa;margin-bottom:4px">カウンター 2</div>
-      <input type="number" class="ticket-input" id="cnt-b" placeholder="0" min="0" oninput="cntUpdate()">
-    </div>
-  </div>
-  <div style="background:#085041;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <span style="font-size:14px;color:rgba(255,255,255,0.6)">合計人数</span>
-    <span style="font-size:28px;font-weight:500" id="cnt-total">— 人</span>
-  </div>
-  <button class="reset" onclick="resetCnt()">リセット</button>
-</div>
-
 <!-- チケット カード -->
 <div class="card">
   <h1>チケット枚数</h1>
@@ -187,6 +167,26 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <span style="font-size:26px;font-weight:500" id="t-sales">— 円</span>
   </div>
   <button class="reset" onclick="resetTicket()">リセット</button>
+</div>
+
+<!-- カウンター カード -->
+<div class="card">
+  <h1>外国人カウンター</h1>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+    <div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:4px">カウンター 1</div>
+      <input type="number" class="ticket-input" id="cnt-a" placeholder="0" min="0" oninput="cntUpdate()">
+    </div>
+    <div>
+      <div style="font-size:11px;color:#aaa;margin-bottom:4px">カウンター 2</div>
+      <input type="number" class="ticket-input" id="cnt-b" placeholder="0" min="0" oninput="cntUpdate()">
+    </div>
+  </div>
+  <div style="background:#085041;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-size:14px;color:rgba(255,255,255,0.6)">合計人数</span>
+    <span style="font-size:28px;font-weight:500" id="cnt-total">— 人</span>
+  </div>
+  <button class="reset" onclick="resetCnt()">リセット</button>
 </div>
 
 <script>
