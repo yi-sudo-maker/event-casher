@@ -148,7 +148,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <hr class="divider">
   <ul class="history" id="t-history"></ul>
   <div class="cur-row">
-    <input type="number" class="ticket-input" id="t-current" placeholder="現在の番号を記録" min="0">
+    <input type="number" class="ticket-input" id="t-current" placeholder="今まで打った枚数（累計）" min="0">
     <button class="add-btn" onclick="addCurrent()">記録</button>
   </div>
   <div class="ticket-total-box">
@@ -480,7 +480,7 @@ function renderHistory(){
     const prev=prevNum(i);
     const diff=(prev!=null)?'+'+(entry.num-prev)+'枚':'';
     const li=document.createElement('li');
-    li.innerHTML=`<span class="h-left"><span class="h-no">#${i+1} ${entry.time}</span><span class="h-num">${entry.num}</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
+    li.innerHTML=`<span class="h-left"><span class="h-no">#${i+1} ${entry.time}</span><span class="h-num">${entry.num.toLocaleString('ja-JP')}枚</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
     ul.appendChild(li);
   });
   ticketUpdate();
