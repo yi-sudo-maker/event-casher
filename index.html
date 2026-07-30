@@ -81,6 +81,12 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .setting-input:focus{outline:none;border-color:#7F77DD}
 .save-btn{width:100%;padding:13px;border-radius:10px;border:none;background:#7F77DD;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:0.5rem}
 .save-btn:active{opacity:0.85}
+.nav-btn{background:none;border:none;font-size:24px;color:#7F77DD;cursor:pointer;padding:2px 8px;border-radius:8px;line-height:1;font-weight:300}
+.nav-btn:active{background:#EEEDFE}
+.nav-btn:disabled{color:#ccc;cursor:default}
+.close-day-btn{width:100%;padding:16px;border-radius:14px;border:none;background:#1a1a1a;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.02em}
+.close-day-btn:active{opacity:0.8}
+.close-day-wrap{width:100%;max-width:420px;padding-bottom:1.5rem}
 </style>
 </head>
 <body>
@@ -105,7 +111,11 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 </div>
 
 <div class="top-bar">
-  <span class="today-date" id="today-date-display"></span>
+  <div style="display:flex;align-items:center;gap:4px">
+    <button class="nav-btn" onclick="prevDay()">‹</button>
+    <span class="today-date" id="today-date-display"></span>
+    <button class="nav-btn" onclick="nextDay()" id="next-btn" disabled>›</button>
+  </div>
   <div class="top-right">
     <a href="data.html" class="data-link">📊 データ</a>
   </div>
@@ -223,20 +233,53 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <button class="reset" onclick="resetFinal()">リセット</button>
 </div>
 
+<!-- 終了ボタン -->
+<div class="close-day-wrap">
+  <button class="close-day-btn" onclick="closeDay()">📋 この日の集計を締める</button>
+</div>
+
 <script>
 const DB_KEY='event-casher-records';
 let currentTicketTotal=0;
 let currentCashPrepTotal=0;
 let saveTimer=null;
+let viewDate=new Date();
 
-function getTodayKey(){
-  const d=new Date();
+function dateToKey(d){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
-function getTodayDisplay(){
-  const d=new Date();
+function dateToDisplay(d){
   const days=['日','月','火','水','木','金','土'];
   return (d.getMonth()+1)+'月'+d.getDate()+'日（'+days[d.getDay()]+'）';
+}
+function getViewKey(){ return dateToKey(viewDate); }
+function getViewDisplay(){ return dateToDisplay(viewDate); }
+function isToday(){
+  const t=new Date();
+  return viewDate.getFullYear()===t.getFullYear()&&viewDate.getMonth()===t.getMonth()&&viewDate.getDate()===t.getDate();
+}
+function prevDay(){
+  viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()-1);
+  switchDate();
+}
+function nextDay(){
+  const next=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+1);
+  const today=new Date(); today.setHours(0,0,0,0);
+  if(next>today) return;
+  viewDate=next;
+  switchDate();
+}
+function switchDate(){
+  clearTimeout(saveTimer);
+  document.getElementById('today-date-display').textContent=getViewDisplay();
+  document.getElementById('next-btn').disabled=isToday();
+  resetAllFields();
+  const had=loadDateData(getViewKey());
+  document.getElementById('sales-label').textContent='販売金額（×¥'+ticketPrice.toLocaleString('ja-JP')+'）';
+  renderBundles();
+  renderHistory();
+  if(!had) addBundle();
+  if(!had) document.getElementById('save-bar').textContent='';
 }
 function loadAllRecords(){
   try{ return JSON.parse(localStorage.getItem(DB_KEY))||{}; }catch(e){ return{}; }
@@ -245,8 +288,37 @@ function autoSave(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(saveToday,1200);
 }
+function resetAllFields(){
+  denoms.forEach(d=>{
+    document.getElementById('cnt-'+d).value='';
+    document.getElementById('st-'+d).textContent='¥0';
+    document.getElementById('sub-'+d).textContent='0枚';
+  });
+  currentCashPrepTotal=0;
+  document.getElementById('grand-total').textContent='¥0';
+  finalDenoms.forEach(d=>{
+    document.getElementById('fcnt-'+d).value='';
+    document.getElementById('fst-'+d).textContent='¥0';
+    document.getElementById('fsub-'+d).textContent='0枚';
+  });
+  document.getElementById('final-total').textContent='¥0';
+  document.getElementById('diff-val').textContent='¥0';
+  document.getElementById('diff-calc').textContent='¥0 − ¥0';
+  const diffBox=document.getElementById('diff-box');
+  diffBox.style.borderColor='#e0e0e0';diffBox.style.background='';
+  document.getElementById('diff-val').style.color='#1a1a1a';
+  document.getElementById('cnt-a').value='';
+  document.getElementById('cnt-b').value='';
+  document.getElementById('cnt-total').textContent='— 人';
+  bundles=[];curHistory=[];currentTicketTotal=0;
+  document.getElementById('bundle-list').innerHTML='';
+  document.getElementById('t-current').value='';
+  document.getElementById('t-history').innerHTML='';
+  document.getElementById('t-total').textContent='— 枚';
+  document.getElementById('t-sales').textContent='— 円';
+}
 function saveToday(){
-  const today=getTodayKey();
+  const today=getViewKey();
   const records=loadAllRecords();
   const cntA=parseInt(document.getElementById('cnt-a').value)||0;
   const cntB=parseInt(document.getElementById('cnt-b').value)||0;
@@ -270,10 +342,9 @@ function saveToday(){
   localStorage.setItem(DB_KEY,JSON.stringify(records));
   document.getElementById('save-bar').textContent='✓ '+timeStr+' に自動保存';
 }
-function loadTodayData(){
-  const today=getTodayKey();
+function loadDateData(key){
   const records=loadAllRecords();
-  const rec=records[today];
+  const rec=records[key];
   if(!rec) return false;
   if(rec.cashInputs){
     Object.entries(rec.cashInputs).forEach(([d,n])=>{
@@ -532,9 +603,25 @@ function resetTicket(){
   autoSave();
 }
 
+/* ===== 締め ===== */
+function closeDay(){
+  saveToday();
+  const key=getViewKey();
+  const records=loadAllRecords();
+  if(records[key]){
+    records[key].closed=true;
+    localStorage.setItem(DB_KEY,JSON.stringify(records));
+  }
+  const bar=document.getElementById('save-bar');
+  bar.textContent='✅ '+getViewDisplay()+' の集計を締めました';
+  bar.style.color='#085041';
+  setTimeout(()=>{bar.style.color='';},3000);
+}
+
 /* ===== 初期化 ===== */
-document.getElementById('today-date-display').textContent=getTodayDisplay();
-const hadData=loadTodayData();
+document.getElementById('today-date-display').textContent=getViewDisplay();
+document.getElementById('next-btn').disabled=true;
+const hadData=loadDateData(getViewKey());
 document.getElementById('sales-label').textContent='販売金額（×¥'+ticketPrice.toLocaleString('ja-JP')+'）';
 renderBundles();
 renderHistory();
