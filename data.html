@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>データ記録</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;background:#f5f5f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:1rem;gap:1rem}
+.top-bar{width:100%;max-width:420px;display:flex;justify-content:space-between;align-items:center;padding-top:0.25rem}
+.back-link{font-size:13px;color:#7F77DD;text-decoration:none;padding:6px 14px;border-radius:8px;background:#EEEDFE}
+.page-title{font-size:17px;font-weight:700;color:#1a1a1a}
+.card{background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:420px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+h2{font-size:14px;font-weight:600;color:#888;margin-bottom:1rem}
+/* サマリーグリッド */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.summary-item{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:12px}
+.s-label{font-size:11px;color:#aaa;margin-bottom:4px}
+.s-val{font-size:22px;font-weight:700;color:#1a1a1a;line-height:1.1}
+.s-unit{font-size:12px;color:#999;margin-top:2px}
+/* チャート */
+.chart-row{margin-bottom:10px}
+.chart-date{font-size:11px;color:#888;margin-bottom:3px}
+.chart-flex{display:flex;align-items:center;gap:8px}
+.chart-bg{flex:1;background:#f5f5f0;border-radius:6px;height:22px;overflow:hidden}
+.chart-fill{background:linear-gradient(90deg,#7F77DD,#a89fe8);border-radius:6px;height:22px;min-width:2px;transition:width 0.4s ease}
+.chart-amt{font-size:12px;color:#7F77DD;font-weight:600;white-space:nowrap;min-width:80px;text-align:right}
+/* テーブル */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:11px;color:#aaa;font-weight:500;padding:6px 4px;border-bottom:1px solid #eee;text-align:right}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:9px 4px;border-bottom:1px solid #f5f5f0;color:#1a1a1a;text-align:right;vertical-align:middle}
+.tbl td:first-child{text-align:left;color:#555;font-size:12px}
+.tbl td.amount{font-weight:700;color:#3C3489}
+.tbl tr.total-row td{font-weight:700;color:#1a1a1a;border-top:2px solid #eee;border-bottom:none;padding-top:12px}
+.tbl tr.total-row td.amount{color:#3C3489}
+.del-btn{background:none;border:none;cursor:pointer;color:#ddd;font-size:13px;padding:2px 4px}
+.del-btn:active{color:#f55}
+/* 比率カード */
+.ratio-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ratio-item{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:10px;padding:10px;text-align:center}
+.ratio-label{font-size:10px;color:#aaa;margin-bottom:4px}
+.ratio-val{font-size:18px;font-weight:700;color:#1a1a1a}
+.ratio-sub{font-size:10px;color:#999;margin-top:2px}
+/* 空 */
+.empty{text-align:center;color:#bbb;padding:2rem;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html" class="back-link">← 戻る</a>
+  <span class="page-title">📊 データ記録</span>
+</div>
+
+<!-- 累計サマリー -->
+<div class="card">
+  <h2>累計サマリー</h2>
+  <div class="summary-grid" id="summary-area">
+    <div class="summary-item"><div class="s-label">総販売枚数</div><div class="s-val" id="s-tickets">—</div><div class="s-unit">枚</div></div>
+    <div class="summary-item"><div class="s-label">総販売金額</div><div class="s-val" id="s-sales">—</div><div class="s-unit">円</div></div>
+    <div class="summary-item"><div class="s-label">営業日数</div><div class="s-val" id="s-days">—</div><div class="s-unit">日</div></div>
+    <div class="summary-item"><div class="s-label">外国人合計</div><div class="s-val" id="s-foreign">—</div><div class="s-unit">人</div></div>
+  </div>
+</div>
+
+<!-- 比率 -->
+<div class="card">
+  <h2>平均・比率</h2>
+  <div class="ratio-grid" id="ratio-area">
+    <div class="ratio-item"><div class="ratio-label">1日平均 枚数</div><div class="ratio-val" id="r-avg-ticket">—</div><div class="ratio-sub">枚/日</div></div>
+    <div class="ratio-item"><div class="ratio-label">1日平均 売上</div><div class="ratio-val" id="r-avg-sales">—</div><div class="ratio-sub">円/日</div></div>
+    <div class="ratio-item"><div class="ratio-label">外国人 平均</div><div class="ratio-val" id="r-avg-foreign">—</div><div class="ratio-sub">人/日</div></div>
+  </div>
+</div>
+
+<!-- バーチャート -->
+<div class="card">
+  <h2>日別 販売金額</h2>
+  <div id="chart-area"><div class="empty">データがありません</div></div>
+</div>
+
+<!-- 日別テーブル -->
+<div class="card">
+  <h2>日別 記録</h2>
+  <div id="table-area"><div class="empty">データがありません</div></div>
+</div>
+
+<script>
+const DB_KEY='event-casher-records';
+
+function loadRecords(){
+  try{ return JSON.parse(localStorage.getItem(DB_KEY))||{}; }catch(e){ return{}; }
+}
+function fmtDate(key){
+  const [y,m,d]=key.split('-');
+  const days=['日','月','火','水','木','金','土'];
+  const dow=days[new Date(key+'T00:00:00').getDay()];
+  return m+'月'+parseInt(d)+'日（'+dow+'）';
+}
+function fmtNum(n){
+  if(n==null||isNaN(n)) return '—';
+  return n.toLocaleString('ja-JP');
+}
+function deleteRecord(key){
+  if(!confirm(fmtDate(key)+'のデータを削除しますか？')) return;
+  const records=loadRecords();
+  delete records[key];
+  localStorage.setItem(DB_KEY,JSON.stringify(records));
+  render();
+}
+
+function render(){
+  const records=loadRecords();
+  const keys=Object.keys(records).sort();
+
+  if(keys.length===0){
+    ['s-tickets','s-sales','s-days','s-foreign'].forEach(id=>document.getElementById(id).textContent='0');
+    ['r-avg-ticket','r-avg-sales','r-avg-foreign'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('chart-area').innerHTML='<div class="empty">データがありません</div>';
+    document.getElementById('table-area').innerHTML='<div class="empty">データがありません</div>';
+    return;
+  }
+
+  let totalTickets=0,totalSales=0,totalForeign=0;
+  keys.forEach(k=>{
+    const r=records[k];
+    totalTickets+=(r.ticketTotal||0);
+    totalSales+=(r.salesAmount||0);
+    totalForeign+=(r.foreignVisitors||0);
+  });
+  const days=keys.length;
+
+  document.getElementById('s-tickets').textContent=fmtNum(totalTickets);
+  document.getElementById('s-sales').textContent=fmtNum(totalSales);
+  document.getElementById('s-days').textContent=days;
+  document.getElementById('s-foreign').textContent=fmtNum(totalForeign);
+
+  document.getElementById('r-avg-ticket').textContent=Math.round(totalTickets/days);
+  document.getElementById('r-avg-sales').textContent=fmtNum(Math.round(totalSales/days));
+  document.getElementById('r-avg-foreign').textContent=Math.round(totalForeign/days);
+
+  // チャート
+  const maxSales=Math.max(...keys.map(k=>records[k].salesAmount||0),1);
+  let chartHTML='';
+  keys.slice().reverse().forEach(k=>{
+    const r=records[k];
+    const sales=r.salesAmount||0;
+    const pct=Math.round((sales/maxSales)*100);
+    chartHTML+=`<div class="chart-row">
+      <div class="chart-date">${fmtDate(k)}</div>
+      <div class="chart-flex">
+        <div class="chart-bg"><div class="chart-fill" style="width:${pct}%"></div></div>
+        <span class="chart-amt">¥${fmtNum(sales)}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById('chart-area').innerHTML=chartHTML;
+
+  // テーブル
+  let tbl=`<table class="tbl">
+    <tr><th>日付</th><th>枚数</th><th>販売金額</th><th>外国人</th><th></th></tr>`;
+  keys.slice().reverse().forEach(k=>{
+    const r=records[k];
+    const salesPct=totalSales>0?Math.round((r.salesAmount||0)/totalSales*100):0;
+    tbl+=`<tr>
+      <td>${fmtDate(k)}</td>
+      <td>${r.ticketTotal||0}枚</td>
+      <td class="amount">¥${fmtNum(r.salesAmount)}</td>
+      <td>${r.foreignVisitors||0}人</td>
+      <td><button class="del-btn" onclick="deleteRecord('${k}')">✕</button></td>
+    </tr>`;
+  });
+  tbl+=`<tr class="total-row">
+    <td>合計</td>
+    <td>${totalTickets}枚</td>
+    <td class="amount">¥${fmtNum(totalSales)}</td>
+    <td>${totalForeign}人</td>
+    <td></td>
+  </tr></table>`;
+  document.getElementById('table-area').innerHTML=tbl;
+}
+
+render();
+</script>
+</body>
+</html>
