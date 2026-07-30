@@ -148,11 +148,11 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <hr class="divider">
   <ul class="history" id="t-history"></ul>
   <div class="cur-row">
-    <input type="number" class="ticket-input" id="t-current" placeholder="今まで打った枚数（累計）" min="0">
+    <input type="number" class="ticket-input" id="t-current" placeholder="現在売った枚数（累計）" min="0">
     <button class="add-btn" onclick="addCurrent()">記録</button>
   </div>
   <div class="ticket-total-box">
-    <span class="ticket-total-label">打った枚数（合計）</span>
+    <span class="ticket-total-label">売った枚数（合計）</span>
     <span class="ticket-total-val" id="t-total">— 枚</span>
   </div>
   <div style="background:#1a1a1a;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
@@ -440,7 +440,7 @@ function renderBundles(){
   container.innerHTML='';
   bundles.forEach((b,i)=>{
     const s=b.start,l=b.last;
-    const count=(s!=null&&l!=null&&l>=s)?(l-s+1)+'枚':'—';
+    const count=(s!=null&&l!=null&&l>s)?(l-s)+'枚':'—';
     const div=document.createElement('div');
     div.className='bundle';
     div.innerHTML=`
@@ -466,7 +466,7 @@ function onBundleInput(i){
   bundles[i].last=bundleVal(i,'last');
   const s=bundles[i].start,l=bundles[i].last;
   const resEl=document.getElementById('bundle-list').querySelectorAll('.bundle-result')[i];
-  if(resEl) resEl.textContent=(s!=null&&l!=null&&l>=s)?(l-s+1)+'枚':'—';
+  if(resEl) resEl.textContent=(s!=null&&l!=null&&l>s)?(l-s)+'枚':'—';
   ticketUpdate();
 }
 function prevNum(idx){
@@ -504,8 +504,8 @@ function ticketUpdate(){
   const salesEl=document.getElementById('t-sales');
   let total=0,hasAny=false;
   bundles.forEach(b=>{
-    if(b.start!=null&&b.last!=null&&b.last>=b.start){
-      total+=b.last-b.start+1;
+    if(b.start!=null&&b.last!=null&&b.last>b.start){
+      total+=b.last-b.start;
       hasAny=true;
     }
   });
