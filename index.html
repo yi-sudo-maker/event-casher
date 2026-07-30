@@ -190,8 +190,17 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <span class="ticket-total-val" id="t-total">— 枚</span>
   </div>
   <div style="background:#1a1a1a;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
-    <span style="font-size:14px;color:#aaa" id="sales-label">販売金額（×¥1,500）</span>
+    <span style="font-size:14px;color:#aaa" id="sales-label">チケット（×¥1,500）</span>
     <span style="font-size:26px;font-weight:500" id="t-sales">— 円</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:10px 14px">
+    <span style="font-size:14px;color:#555;white-space:nowrap;flex-shrink:0">💳 クレジット</span>
+    <input type="number" class="ticket-input" id="t-credit" placeholder="0" min="0" style="flex:1;text-align:right" oninput="ticketUpdate()">
+    <span style="font-size:13px;color:#888;flex-shrink:0">円</span>
+  </div>
+  <div style="background:#085041;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+    <span style="font-size:14px;color:rgba(255,255,255,0.6)">合計売上</span>
+    <span style="font-size:26px;font-weight:500" id="t-grand">— 円</span>
   </div>
   <button class="reset" onclick="resetTicket()">リセット</button>
 </div>
@@ -327,7 +336,6 @@ function resetAllFields(){
   document.getElementById('cnt-total').textContent='— 人';
   bundles=[];curHistory=[];currentTicketTotal=0;
   document.getElementById('bundle-list').innerHTML='';
-  document.getElementById('t-current').value='';
   document.getElementById('t-history').innerHTML='';
   document.getElementById('t-total').textContent='— 枚';
   document.getElementById('t-sales').textContent='— 円';
@@ -338,7 +346,8 @@ async function saveToday(){
   const cntB=parseInt(document.getElementById('cnt-b').value)||0;
   const now=new Date();
   const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  const record={date:today,ticketTotal:currentTicketTotal,salesAmount:currentTicketTotal*ticketPrice,salesPrice:ticketPrice,foreignVisitors:cntA+cntB,cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},cashTotal:currentCashPrepTotal,finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),bundles:JSON.parse(JSON.stringify(bundles)),curHistory:JSON.parse(JSON.stringify(curHistory)),cntA,cntB,updatedAt:timeStr};
+  const creditAmount=parseInt(document.getElementById('t-credit').value)||0;
+  const record={date:today,ticketTotal:currentTicketTotal,ticketSales:currentTicketTotal*ticketPrice,creditAmount,salesAmount:(currentTicketTotal*ticketPrice)+creditAmount,salesPrice:ticketPrice,foreignVisitors:cntA+cntB,cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},cashTotal:currentCashPrepTotal,finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),bundles:JSON.parse(JSON.stringify(bundles)),curHistory:JSON.parse(JSON.stringify(curHistory)),cntA,cntB,updatedAt:timeStr};
   try{await fbdb.ref(FB_PATH+'/'+today).set(record);document.getElementById('save-bar').textContent='✓ '+timeStr+' に自動保存';}
   catch(e){document.getElementById('save-bar').textContent='⚠️ 保存失敗';}
 }
@@ -353,6 +362,7 @@ async function loadDateData(key){
     if(rec.bundles){bundles=rec.bundles;}
     if(rec.curHistory){curHistory=rec.curHistory;}
     if(rec.salesPrice){ticketPrice=rec.salesPrice;}
+    if(rec.creditAmount!=null){document.getElementById('t-credit').value=rec.creditAmount||'';}
     if(rec.updatedAt){document.getElementById('save-bar').textContent='✓ '+rec.updatedAt+' に自動保存';}
     return true;
   }catch(e){return false;}
@@ -622,6 +632,7 @@ function removeHistory(i){
 function ticketUpdate(){
   const totalEl=document.getElementById('t-total');
   const salesEl=document.getElementById('t-sales');
+  const grandEl=document.getElementById('t-grand');
   let total=0,hasAny=false;
   bundles.forEach(b=>{
     if(b.start!=null&&b.last!=null&&b.last>b.start){
@@ -630,12 +641,19 @@ function ticketUpdate(){
     }
   });
   currentTicketTotal=hasAny?total:0;
+  const credit=parseInt(document.getElementById('t-credit').value)||0;
+  const ticketSales=currentTicketTotal*ticketPrice;
   if(hasAny){
     totalEl.textContent=total+'枚';
-    salesEl.textContent='¥'+(total*ticketPrice).toLocaleString('ja-JP');
+    salesEl.textContent='¥'+ticketSales.toLocaleString('ja-JP');
   } else {
     totalEl.textContent='— 枚';
     salesEl.textContent='— 円';
+  }
+  if(hasAny||credit>0){
+    grandEl.textContent='¥'+(ticketSales+credit).toLocaleString('ja-JP');
+  } else {
+    grandEl.textContent='— 円';
   }
   autoSave();
 }
@@ -644,10 +662,11 @@ function resetTicket(){
   curHistory=[];
   currentTicketTotal=0;
   document.getElementById('bundle-list').innerHTML='';
-  document.getElementById('t-current').value='';
   document.getElementById('t-history').innerHTML='';
   document.getElementById('t-total').textContent='— 枚';
   document.getElementById('t-sales').textContent='— 円';
+  document.getElementById('t-credit').value='';
+  document.getElementById('t-grand').textContent='— 円';
   addBundle();
   autoSave();
 }
