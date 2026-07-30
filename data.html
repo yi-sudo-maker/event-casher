@@ -37,7 +37,7 @@ h2{font-size:14px;font-weight:600;color:#888;margin-bottom:1rem}
 .del-btn{background:none;border:none;cursor:pointer;color:#ddd;font-size:13px;padding:2px 4px}
 .del-btn:active{color:#f55}
 /* 比率カード */
-.ratio-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ratio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ratio-item{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:10px;padding:10px;text-align:center}
 .ratio-label{font-size:10px;color:#aaa;margin-bottom:4px}
 .ratio-val{font-size:18px;font-weight:700;color:#1a1a1a}
@@ -71,6 +71,7 @@ h2{font-size:14px;font-weight:600;color:#888;margin-bottom:1rem}
     <div class="ratio-item"><div class="ratio-label">1日平均 枚数</div><div class="ratio-val" id="r-avg-ticket">—</div><div class="ratio-sub">枚/日</div></div>
     <div class="ratio-item"><div class="ratio-label">1日平均 売上</div><div class="ratio-val" id="r-avg-sales">—</div><div class="ratio-sub">円/日</div></div>
     <div class="ratio-item"><div class="ratio-label">外国人 平均</div><div class="ratio-val" id="r-avg-foreign">—</div><div class="ratio-sub">人/日</div></div>
+    <div class="ratio-item"><div class="ratio-label">外国人比率</div><div class="ratio-val" id="r-foreign-ratio">—</div><div class="ratio-sub">% （外国人/販売枚数）</div></div>
   </div>
 </div>
 
@@ -139,6 +140,8 @@ function render(){
   document.getElementById('r-avg-ticket').textContent=Math.round(totalTickets/days);
   document.getElementById('r-avg-sales').textContent=fmtNum(Math.round(totalSales/days));
   document.getElementById('r-avg-foreign').textContent=Math.round(totalForeign/days);
+  const foreignRatio=totalTickets>0?Math.round(totalForeign/totalTickets*100):0;
+  document.getElementById('r-foreign-ratio').textContent=foreignRatio+'%';
 
   // チャート
   const maxSales=Math.max(...keys.map(k=>records[k].salesAmount||0),1);

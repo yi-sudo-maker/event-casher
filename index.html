@@ -37,8 +37,8 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .ticket-input:focus{outline:none;border-color:#7F77DD}
 .add-btn{padding:8px 14px;border-radius:8px;border:none;background:#7F77DD;color:#fff;font-size:14px;cursor:pointer;flex-shrink:0;font-family:inherit;white-space:nowrap}
 .add-btn:active{opacity:0.8}
-.jump-btn{width:100%;padding:9px;border-radius:8px;border:1.5px dashed #ccc;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;margin:4px 0 12px}
-.jump-btn:active{background:#f5f5f0}
+.jump-btn{padding:3px 8px;border-radius:6px;border:none;background:transparent;color:#ccc;font-size:11px;cursor:pointer;font-family:inherit;margin:0 0 10px;display:block}
+.jump-btn:active{color:#999}
 .bundle{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:12px;margin-bottom:10px}
 .bundle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .bundle-title{font-size:12px;font-weight:600;color:#7F77DD}
@@ -63,8 +63,8 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .diff-sub{font-size:11px;color:#aaa}
 .diff-calc{font-size:11px;color:#bbb}
 .diff-val{font-size:28px;font-weight:700;color:#1a1a1a;transition:color 0.2s}
-.settings-fab{position:fixed;top:14px;right:14px;width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:100;color:#666}
-.settings-fab:active{transform:scale(0.93)}
+.settings-icon{background:none;border:none;cursor:pointer;font-size:18px;padding:5px 7px;border-radius:8px;line-height:1;color:#666}
+.settings-icon:active{background:#f0f0f0}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-width:480px;animation:slideUp 0.25s ease}
@@ -91,8 +91,6 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 </head>
 <body>
 
-<button class="settings-fab" onclick="openSettings()" title="設定">⚙️</button>
-
 <div class="modal-overlay" id="settings-overlay" onclick="overlayClick(event)">
   <div class="modal">
     <div class="modal-header">
@@ -118,6 +116,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   </div>
   <div class="top-right">
     <a href="data.html" class="data-link">📊 データ</a>
+    <button class="settings-icon" onclick="openSettings()" title="設定">⚙️</button>
   </div>
 </div>
 <div class="save-bar" id="save-bar"></div>
@@ -154,7 +153,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 <div class="card">
   <h1>チケット枚数</h1>
   <div id="bundle-list"></div>
-  <button class="jump-btn" onclick="addBundle()">＋ 番号が飛んだ（新しい束を追加）</button>
+  <button class="jump-btn" onclick="addBundle()">＋ 番号が飛んだ</button>
   <hr class="divider">
   <ul class="history" id="t-history"></ul>
   <div class="cur-row">
@@ -263,10 +262,8 @@ function prevDay(){
   switchDate();
 }
 function nextDay(){
-  const next=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+1);
-  const today=new Date(); today.setHours(0,0,0,0);
-  if(next>today) return;
-  viewDate=next;
+  if(isToday()) return;
+  viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+1);
   switchDate();
 }
 function switchDate(){
@@ -515,17 +512,14 @@ function renderBundles(){
     const div=document.createElement('div');
     div.className='bundle';
     div.innerHTML=`
-      <div class="bundle-header">
-        <span class="bundle-title">束 ${i+1}</span>
-        <button class="bundle-del" onclick="removeBundle(${i})">✕</button>
-      </div>
-      <div class="bundle-fields">
+      <div class="bundle-fields" style="position:relative">
         <div class="bundle-field"><label>スタート</label>
           <input type="number" class="ticket-input" id="b-start-${i}" placeholder="開始番号" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
         </div>
-        <div class="bundle-field"><label>ラスト</label>
-          <input type="number" class="ticket-input" id="b-last-${i}" placeholder="最終番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
+        <div class="bundle-field"><label>ラスト（次の番号）</label>
+          <input type="number" class="ticket-input" id="b-last-${i}" placeholder="次の番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
         </div>
+        ${bundles.length>1?`<button class="bundle-del" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #eee;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;color:#bbb;padding:0;line-height:20px;text-align:center" onclick="removeBundle(${i})">✕</button>`:''}
       </div>
       <div class="bundle-result">${count}</div>`;
     container.appendChild(div);
