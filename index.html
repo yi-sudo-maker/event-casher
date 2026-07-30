@@ -92,9 +92,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .pin-screen.hidden{display:none}
 .pin-title{font-size:22px;font-weight:700;color:#1a1a1a}
 .pin-sub{font-size:13px;color:#aaa}
-.pin-dots{display:flex;gap:16px;margin:8px 0}
-.pin-dot{width:16px;height:16px;border-radius:50%;background:#e0e0e0;transition:background 0.15s}
-.pin-dot.filled{background:#7F77DD}
+.pin-display{font-size:28px;font-weight:600;color:#1a1a1a;letter-spacing:6px;min-height:44px;min-width:120px;text-align:center}
 .pin-error{font-size:13px;color:#c62828;min-height:18px}
 .pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
 .pin-key{width:72px;height:72px;border-radius:50%;border:none;background:#fff;font-size:22px;font-weight:500;color:#1a1a1a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);font-family:inherit}
@@ -109,12 +107,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 <div class="pin-screen" id="pin-screen">
   <div class="pin-title">🔐 認証</div>
   <div class="pin-sub">PINコードを入力してください</div>
-  <div class="pin-dots">
-    <div class="pin-dot" id="pd0"></div>
-    <div class="pin-dot" id="pd1"></div>
-    <div class="pin-dot" id="pd2"></div>
-    <div class="pin-dot" id="pd3"></div>
-  </div>
+  <div class="pin-display" id="pin-display">—</div>
   <div class="pin-error" id="pin-error"></div>
   <div class="pin-pad">
     <button class="pin-key" onclick="pinKey('1')">1</button>
@@ -126,9 +119,9 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <button class="pin-key" onclick="pinKey('7')">7</button>
     <button class="pin-key" onclick="pinKey('8')">8</button>
     <button class="pin-key" onclick="pinKey('9')">9</button>
-    <button class="pin-key empty"></button>
-    <button class="pin-key" onclick="pinKey('0')">0</button>
     <button class="pin-key del" onclick="pinDel()">⌫</button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key" style="font-size:14px;background:#7F77DD;color:#fff" onclick="checkPin()">OK</button>
   </div>
 </div>
 
@@ -148,7 +141,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <div class="setting-row">
       <div class="setting-label">PINコード（4桁）</div>
       <div class="setting-input-wrap">
-        <input type="number" class="setting-input" id="setting-pin" placeholder="1234" min="0" max="9999">
+        <input type="number" class="setting-input" id="setting-pin" placeholder="1234" min="0">
       </div>
     </div>
     <button class="save-btn" onclick="saveSettings()">保存</button>
@@ -422,20 +415,17 @@ const PIN_KEY='event-casher-pin';
 let pinBuffer='';
 function getPin(){ return localStorage.getItem(PIN_KEY)||'1234'; }
 function pinKey(d){
-  if(pinBuffer.length>=4) return;
   pinBuffer+=d;
-  updatePinDots();
-  if(pinBuffer.length===4) setTimeout(checkPin,120);
+  updatePinDisplay();
 }
 function pinDel(){
   pinBuffer=pinBuffer.slice(0,-1);
-  updatePinDots();
+  updatePinDisplay();
   document.getElementById('pin-error').textContent='';
 }
-function updatePinDots(){
-  for(let i=0;i<4;i++){
-    document.getElementById('pd'+i).classList.toggle('filled',i<pinBuffer.length);
-  }
+function updatePinDisplay(){
+  const el=document.getElementById('pin-display');
+  el.textContent=pinBuffer.length>0?'●'.repeat(pinBuffer.length):'—';
 }
 function checkPin(){
   if(pinBuffer===getPin()){
@@ -444,7 +434,7 @@ function checkPin(){
   } else {
     document.getElementById('pin-error').textContent='PINが違います';
     pinBuffer='';
-    updatePinDots();
+    updatePinDisplay();
   }
 }
 function initPin(){
@@ -474,7 +464,7 @@ function saveSettings(){
     ticketUpdate();
   }
   const p=document.getElementById('setting-pin').value.trim();
-  if(p.length===4&&/^\d{4}$/.test(p)){
+  if(p.length>0&&/^\d+$/.test(p)){
     localStorage.setItem(PIN_KEY,p);
   }
   closeSettings();
