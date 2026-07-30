@@ -39,17 +39,15 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .add-btn:active{opacity:0.8}
 .jump-btn{padding:3px 8px;border-radius:6px;border:none;background:transparent;color:#ccc;font-size:11px;cursor:pointer;font-family:inherit;margin:0 0 10px;display:block}
 .jump-btn:active{color:#999}
-.bundle{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:12px;margin-bottom:10px}
-.bundle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.bundle-title{font-size:12px;font-weight:600;color:#7F77DD}
-.bundle-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0}
-.bundle-fields{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end}
-.bundle-field label{display:block;font-size:11px;color:#aaa;margin-bottom:3px}
-.bundle-result{text-align:right;font-size:13px;color:#7F77DD;font-weight:600}
-.bundle-btns{display:flex;flex-direction:column;gap:5px}
-.rec-small{padding:6px 10px;border-radius:7px;border:none;background:#7F77DD;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.bundle{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:14px;margin-bottom:10px;position:relative}
+.bundle-del{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:0;line-height:1}
+.bundle-fields{display:flex;flex-direction:column;gap:10px}
+.bundle-field label{display:block;font-size:12px;color:#888;margin-bottom:5px;font-weight:500}
+.bundle-result{font-size:22px;color:#7F77DD;font-weight:700;text-align:center;margin:4px 0 2px}
+.bundle-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.rec-small{padding:13px;border-radius:10px;border:none;background:#7F77DD;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
 .rec-small:active{opacity:0.8}
-.fin-small{padding:6px 10px;border-radius:7px;border:none;background:#1a1a1a;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.fin-small{padding:13px;border-radius:10px;border:none;background:#1a1a1a;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
 .fin-small:active{opacity:0.8}
 .history{margin:4px 0 8px;padding:0;list-style:none}
 .history li{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#555;padding:5px 8px;background:#fff;border:1px solid #eee;border-radius:7px;margin-bottom:3px}
@@ -187,10 +185,6 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <button class="jump-btn" onclick="addBundle()">＋ 追加</button>
   <hr class="divider">
   <ul class="history" id="t-history"></ul>
-  <div class="cur-row">
-    <input type="number" class="ticket-input" id="t-current" placeholder="現在売った枚数（累計）" min="0">
-    <button class="add-btn" onclick="addCurrent()">記録</button>
-  </div>
   <div class="ticket-total-box">
     <span class="ticket-total-label">売った枚数（合計）</span>
     <span class="ticket-total-val" id="t-total">— 枚</span>
@@ -549,20 +543,20 @@ function renderBundles(){
     const div=document.createElement('div');
     div.className='bundle';
     div.innerHTML=`
-      <div class="bundle-fields" style="position:relative">
+      ${bundles.length>1?`<button class="bundle-del" onclick="removeBundle(${i})">✕</button>`:''}
+      <div class="bundle-fields">
         <div class="bundle-field"><label>スタート</label>
           <input type="number" class="ticket-input" id="b-start-${i}" placeholder="開始番号" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
         </div>
         <div class="bundle-field"><label>中間</label>
           <input type="number" class="ticket-input" id="b-last-${i}" placeholder="現在の番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
         </div>
+        <div class="bundle-result">${count}</div>
         <div class="bundle-btns">
           <button class="rec-small" onclick="recordBundle(${i})">記録</button>
           <button class="fin-small" onclick="finalizeBundle(${i})">最終</button>
         </div>
-        ${bundles.length>1?`<button class="bundle-del" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #eee;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;color:#bbb;padding:0;line-height:20px;text-align:center" onclick="removeBundle(${i})">✕</button>`:''}
-      </div>
-      <div class="bundle-result">${count}</div>`;
+      </div>`;
     container.appendChild(div);
   });
   ticketUpdate();
