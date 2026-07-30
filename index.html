@@ -43,9 +43,14 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .bundle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .bundle-title{font-size:12px;font-weight:600;color:#7F77DD}
 .bundle-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0}
-.bundle-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.bundle-fields{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:end}
 .bundle-field label{display:block;font-size:11px;color:#aaa;margin-bottom:3px}
 .bundle-result{text-align:right;font-size:13px;color:#7F77DD;font-weight:600}
+.bundle-btns{display:flex;flex-direction:column;gap:5px}
+.rec-small{padding:6px 10px;border-radius:7px;border:none;background:#7F77DD;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.rec-small:active{opacity:0.8}
+.fin-small{padding:6px 10px;border-radius:7px;border:none;background:#1a1a1a;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.fin-small:active{opacity:0.8}
 .history{margin:4px 0 8px;padding:0;list-style:none}
 .history li{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#555;padding:5px 8px;background:#fff;border:1px solid #eee;border-radius:7px;margin-bottom:3px}
 .history li .h-left{display:flex;flex-direction:column;gap:1px}
@@ -179,7 +184,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 <div class="card">
   <h1>チケット枚数</h1>
   <div id="bundle-list"></div>
-  <button class="jump-btn" onclick="addBundle()">＋ 番号が飛んだ</button>
+  <button class="jump-btn" onclick="addBundle()">＋ 追加</button>
   <hr class="divider">
   <ul class="history" id="t-history"></ul>
   <div class="cur-row">
@@ -548,8 +553,12 @@ function renderBundles(){
         <div class="bundle-field"><label>スタート</label>
           <input type="number" class="ticket-input" id="b-start-${i}" placeholder="開始番号" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
         </div>
-        <div class="bundle-field"><label>ラスト（次の番号）</label>
-          <input type="number" class="ticket-input" id="b-last-${i}" placeholder="次の番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
+        <div class="bundle-field"><label>中間</label>
+          <input type="number" class="ticket-input" id="b-last-${i}" placeholder="現在の番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
+        </div>
+        <div class="bundle-btns">
+          <button class="rec-small" onclick="recordBundle(${i})">記録</button>
+          <button class="fin-small" onclick="finalizeBundle(${i})">最終</button>
         </div>
         ${bundles.length>1?`<button class="bundle-del" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid #eee;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;color:#bbb;padding:0;line-height:20px;text-align:center" onclick="removeBundle(${i})">✕</button>`:''}
       </div>
@@ -577,10 +586,30 @@ function renderHistory(){
     const prev=prevNum(i);
     const diff=(prev!=null)?'+'+(entry.num-prev)+'枚':'';
     const li=document.createElement('li');
-    li.innerHTML=`<span class="h-left"><span class="h-no">#${i+1} ${entry.time}</span><span class="h-num">${entry.num.toLocaleString('ja-JP')}枚</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
+    li.innerHTML=`<span class="h-left"><span class="h-no">${entry.label||('#'+(i+1))} ${entry.time}</span><span class="h-num">${entry.num.toLocaleString('ja-JP')}枚</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
     ul.appendChild(li);
   });
   ticketUpdate();
+}
+function recordBundle(i){
+  const b=bundles[i];
+  if(b.start==null||b.last==null||b.last<=b.start) return;
+  const count=b.last-b.start;
+  const now=new Date();
+  const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  curHistory.push({num:count,time,label:'#'+(i+1)+' '+b.start+'→'+b.last});
+  renderHistory();
+}
+async function finalizeBundle(i){
+  const b=bundles[i];
+  if(b.start==null||b.last==null||b.last<=b.start){
+    alert('スタートと中間の番号を入力してください');return;
+  }
+  await saveToday();
+  const bar=document.getElementById('save-bar');
+  bar.textContent='✅ 最終保存しました';
+  bar.style.color='#085041';
+  setTimeout(()=>{bar.style.color='';},2500);
 }
 function addCurrent(){
   const el=document.getElementById('t-current');
