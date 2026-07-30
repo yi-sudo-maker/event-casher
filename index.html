@@ -149,6 +149,10 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <span class="ticket-total-label">打った枚数（合計）</span>
     <span class="ticket-total-val" id="t-total">— 枚</span>
   </div>
+  <div style="background:#1a1a1a;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+    <span style="font-size:14px;color:#aaa">販売金額（×¥1,500）</span>
+    <span style="font-size:26px;font-weight:500" id="t-sales">— 円</span>
+  </div>
   <button class="reset" onclick="resetTicket()">リセット</button>
 </div>
 
@@ -292,6 +296,7 @@ function removeHistory(i){
 
 function ticketUpdate(){
   const totalEl=document.getElementById('t-total');
+  const salesEl=document.getElementById('t-sales');
   // sum all completed bundles
   let total=0;
   let hasAny=false;
@@ -303,8 +308,10 @@ function ticketUpdate(){
   });
   if(hasAny){
     totalEl.textContent=total+'枚';
+    salesEl.textContent='¥'+(total*1500).toLocaleString('ja-JP');
   } else {
     totalEl.textContent='— 枚';
+    salesEl.textContent='— 円';
   }
 }
 
@@ -315,6 +322,7 @@ function resetTicket(){
   document.getElementById('t-current').value='';
   document.getElementById('t-history').innerHTML='';
   document.getElementById('t-total').textContent='— 枚';
+  document.getElementById('t-sales').textContent='— 円';
 }
 
 // 起動時に1束目を追加
