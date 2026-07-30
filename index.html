@@ -30,26 +30,34 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .total-val{font-size:28px;font-weight:500}
 .reset{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;background:transparent;color:#999;font-size:14px;cursor:pointer;font-family:inherit}
 /* チケット */
-.ticket-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.ticket-label{font-size:13px;color:#555;width:52px;flex-shrink:0}
-.ticket-input{flex:1;font-size:16px;font-weight:500;border:1px solid #ddd;border-radius:8px;padding:8px 10px;color:#1a1a1a;-moz-appearance:textfield}
+.ticket-input{font-size:16px;font-weight:500;border:1px solid #ddd;border-radius:8px;padding:8px 10px;color:#1a1a1a;-moz-appearance:textfield;width:100%}
 .ticket-input::-webkit-inner-spin-button,.ticket-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .ticket-input:focus{outline:none;border-color:#7F77DD}
-.ticket-diff{font-size:13px;color:#666;min-width:64px;text-align:right}
-.add-btn{padding:8px 14px;border-radius:8px;border:none;background:#7F77DD;color:#fff;font-size:14px;cursor:pointer;flex-shrink:0;font-family:inherit}
+.add-btn{padding:8px 14px;border-radius:8px;border:none;background:#7F77DD;color:#fff;font-size:14px;cursor:pointer;flex-shrink:0;font-family:inherit;white-space:nowrap}
 .add-btn:active{opacity:0.8}
-.history{margin:0 0 10px;padding:0;list-style:none}
-.history li{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#555;padding:6px 10px;background:#f9f9f7;border-radius:8px;margin-bottom:4px}
-.history li .h-left{display:flex;flex-direction:column;gap:2px}
-.history li .h-no{color:#aaa;font-size:11px}
-.history li .h-num{font-weight:500;font-size:15px}
-.history li .h-time{color:#bbb;font-size:10px}
-.history li .h-diff{color:#7F77DD;font-weight:500}
-.history li .del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:0 0 0 8px}
+.jump-btn{width:100%;padding:9px;border-radius:8px;border:1.5px dashed #ccc;background:transparent;color:#888;font-size:13px;cursor:pointer;font-family:inherit;margin:4px 0 12px}
+.jump-btn:active{background:#f5f5f0}
+/* 束 */
+.bundle{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:12px;margin-bottom:10px}
+.bundle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bundle-title{font-size:12px;font-weight:600;color:#7F77DD}
+.bundle-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:15px;padding:0}
+.bundle-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.bundle-field label{display:block;font-size:11px;color:#aaa;margin-bottom:3px}
+.bundle-result{text-align:right;font-size:13px;color:#7F77DD;font-weight:600}
+/* 現在履歴 */
+.history{margin:4px 0 8px;padding:0;list-style:none}
+.history li{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#555;padding:5px 8px;background:#fff;border:1px solid #eee;border-radius:7px;margin-bottom:3px}
+.history li .h-left{display:flex;flex-direction:column;gap:1px}
+.history li .h-no{color:#aaa;font-size:10px}
+.history li .h-num{font-weight:600;font-size:14px}
+.history li .h-diff{color:#7F77DD;font-weight:500;font-size:12px}
+.history li .del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:0 0 0 6px}
+.cur-row{display:flex;gap:8px;margin-bottom:4px}
 .ticket-total-box{background:#3C3489;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin:0.75rem 0 0.75rem}
 .ticket-total-label{font-size:14px;color:rgba(255,255,255,0.6)}
 .ticket-total-val{font-size:28px;font-weight:500}
-.divider{border:none;border-top:1px solid #eee;margin:0.25rem 0 1rem}
+.divider{border:none;border-top:1px solid #eee;margin:0.5rem 0 0.75rem}
 </style>
 </head>
 <body>
@@ -102,27 +110,19 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 <div class="card">
   <h1>チケット枚数</h1>
 
-  <div class="ticket-row">
-    <span class="ticket-label">スタート</span>
-    <input type="number" class="ticket-input" id="t-start" placeholder="開始番号" min="0" oninput="ticketUpdate()">
-  </div>
+  <!-- 束リスト -->
+  <div id="bundle-list"></div>
+
+  <!-- 番号が飛んだボタン -->
+  <button class="jump-btn" onclick="addBundle()">＋ 番号が飛んだ（新しい束を追加）</button>
 
   <hr class="divider">
 
-  <!-- 現在の履歴 -->
+  <!-- 現在の進捗記録 -->
   <ul class="history" id="t-history"></ul>
-
-  <div class="ticket-row">
-    <span class="ticket-label">現在</span>
-    <input type="number" class="ticket-input" id="t-current" placeholder="現在の番号" min="0">
+  <div class="cur-row">
+    <input type="number" class="ticket-input" id="t-current" placeholder="現在の番号を記録" min="0">
     <button class="add-btn" onclick="addCurrent()">記録</button>
-  </div>
-
-  <hr class="divider">
-
-  <div class="ticket-row">
-    <span class="ticket-label">ラスト</span>
-    <input type="number" class="ticket-input" id="t-last" placeholder="最終番号" min="0" oninput="ticketUpdate()">
   </div>
 
   <div class="ticket-total-box">
@@ -162,22 +162,79 @@ function resetCash(){
 }
 
 /* ===== チケット ===== */
-let history=[];
+let bundles=[];   // [{start, last}]
+let curHistory=[]; // [{num, time}]
 
-function getStart(){return parseInt(document.getElementById('t-start').value)||null}
-function getLast(){return parseInt(document.getElementById('t-last').value)||null}
+function addBundle(){
+  bundles.push({start:null,last:null});
+  renderBundles();
+}
+
+function removeBundle(i){
+  bundles.splice(i,1);
+  renderBundles();
+}
+
+function bundleVal(i,field){
+  const el=document.getElementById('b-'+field+'-'+i);
+  return el?parseInt(el.value)||null:null;
+}
+
+function renderBundles(){
+  const container=document.getElementById('bundle-list');
+  container.innerHTML='';
+  bundles.forEach((b,i)=>{
+    const s=bundleVal(i,'start');
+    const l=bundleVal(i,'last');
+    const count=(s!=null&&l!=null&&l>=s)?(l-s)+'枚':'—';
+    const div=document.createElement('div');
+    div.className='bundle';
+    div.innerHTML=`
+      <div class="bundle-header">
+        <span class="bundle-title">束 ${i+1}</span>
+        <button class="bundle-del" onclick="removeBundle(${i})">✕</button>
+      </div>
+      <div class="bundle-fields">
+        <div class="bundle-field">
+          <label>スタート</label>
+          <input type="number" class="ticket-input" id="b-start-${i}" placeholder="開始番号" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
+        </div>
+        <div class="bundle-field">
+          <label>ラスト</label>
+          <input type="number" class="ticket-input" id="b-last-${i}" placeholder="最終番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
+        </div>
+      </div>
+      <div class="bundle-result">${count}</div>`;
+    container.appendChild(div);
+  });
+  ticketUpdate();
+}
+
+function onBundleInput(i){
+  bundles[i].start=bundleVal(i,'start');
+  bundles[i].last=bundleVal(i,'last');
+  // update just this bundle's result
+  const s=bundles[i].start;
+  const l=bundles[i].last;
+  const resEl=document.getElementById('bundle-list').querySelectorAll('.bundle-result')[i];
+  if(resEl) resEl.textContent=(s!=null&&l!=null&&l>=s)?(l-s)+'枚':'—';
+  ticketUpdate();
+}
 
 function prevNum(idx){
-  if(idx===0) return getStart();
-  return history[idx-1].num;
+  if(idx===0){
+    // use first bundle's start
+    return bundles.length>0?bundles[0].start:null;
+  }
+  return curHistory[idx-1].num;
 }
 
 function renderHistory(){
   const ul=document.getElementById('t-history');
   ul.innerHTML='';
-  history.forEach((entry,i)=>{
+  curHistory.forEach((entry,i)=>{
     const prev=prevNum(i);
-    const diff=(prev!=null)?'+' + (entry.num - prev)+'枚':'';
+    const diff=(prev!=null)?'+'+(entry.num-prev)+'枚':'';
     const li=document.createElement('li');
     li.innerHTML=`<span class="h-left"><span class="h-no">#${i+1} ${entry.time}</span><span class="h-num">${entry.num}</span></span><span class="h-diff">${diff}</span><button class="del-btn" onclick="removeHistory(${i})">✕</button>`;
     ul.appendChild(li);
@@ -191,38 +248,45 @@ function addCurrent(){
   if(isNaN(num)) return;
   const now=new Date();
   const time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  history.push({num,time});
+  curHistory.push({num,time});
   el.value='';
   renderHistory();
 }
 
 function removeHistory(i){
-  history.splice(i,1);
+  curHistory.splice(i,1);
   renderHistory();
 }
 
 function ticketUpdate(){
-  const start=getStart();
-  const last=getLast();
   const totalEl=document.getElementById('t-total');
-  if(start!=null && last!=null && last>=start){
-    totalEl.textContent=(last-start)+'枚';
-  } else if(start!=null && last==null && history.length>0){
-    const latest=history[history.length-1].num;
-    totalEl.textContent=(latest-start)+'枚';
+  // sum all completed bundles
+  let total=0;
+  let hasAny=false;
+  bundles.forEach(b=>{
+    if(b.start!=null&&b.last!=null&&b.last>=b.start){
+      total+=b.last-b.start;
+      hasAny=true;
+    }
+  });
+  if(hasAny){
+    totalEl.textContent=total+'枚';
   } else {
     totalEl.textContent='— 枚';
   }
 }
 
 function resetTicket(){
-  history=[];
-  document.getElementById('t-start').value='';
+  bundles=[];
+  curHistory=[];
+  document.getElementById('bundle-list').innerHTML='';
   document.getElementById('t-current').value='';
-  document.getElementById('t-last').value='';
   document.getElementById('t-history').innerHTML='';
   document.getElementById('t-total').textContent='— 枚';
 }
+
+// 起動時に1束目を追加
+addBundle();
 </script>
 </body>
 </html>
