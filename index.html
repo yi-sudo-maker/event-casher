@@ -39,16 +39,16 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .add-btn:active{opacity:0.8}
 .jump-btn{padding:3px 8px;border-radius:6px;border:none;background:transparent;color:#ccc;font-size:11px;cursor:pointer;font-family:inherit;margin:0 0 10px;display:block}
 .jump-btn:active{color:#999}
-.bundle{background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:14px;margin-bottom:10px;position:relative}
-.bundle-del{position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:0;line-height:1}
-.bundle-fields{display:flex;flex-direction:column;gap:10px}
-.bundle-field label{display:block;font-size:12px;color:#888;margin-bottom:5px;font-weight:500}
-.bundle-result{font-size:22px;color:#7F77DD;font-weight:700;text-align:center;margin:4px 0 2px}
-.bundle-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.rec-small{padding:13px;border-radius:10px;border:none;background:#7F77DD;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
-.rec-small:active{opacity:0.8}
-.fin-small{padding:13px;border-radius:10px;border:none;background:#1a1a1a;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%}
-.fin-small:active{opacity:0.8}
+.bundle{background:#f9f9f7;border-radius:16px;padding:14px 14px 12px;margin-bottom:8px;position:relative}
+.bundle-del{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.07);border:none;cursor:pointer;color:#666;font-size:11px;padding:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1}
+.bundle-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.bundle-field-label{font-size:10px;color:#aaa;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px}
+.bundle-inp{width:100%;font-size:22px;font-weight:500;border:none;border-radius:10px;padding:10px 8px;text-align:center;background:#fff;color:#1a1a1a;-moz-appearance:textfield;box-shadow:0 1px 4px rgba(0,0,0,0.1);font-family:inherit}
+.bundle-inp::-webkit-inner-spin-button,.bundle-inp::-webkit-outer-spin-button{-webkit-appearance:none}
+.bundle-inp:focus{outline:none;box-shadow:0 0 0 3px rgba(127,119,221,0.25)}
+.bundle-result{font-size:36px;font-weight:700;color:#1a1a1a;text-align:center;margin:2px 0 10px;letter-spacing:-0.03em;line-height:1.1}
+.rec-small{padding:13px;border-radius:12px;border:none;background:#7F77DD;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;letter-spacing:0.01em}
+.rec-small:active{opacity:0.82}
 .history{margin:4px 0 8px;padding:0;list-style:none}
 .history li{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#555;padding:5px 8px;background:#fff;border:1px solid #eee;border-radius:7px;margin-bottom:3px}
 .history li .h-left{display:flex;flex-direction:column;gap:1px}
@@ -190,17 +190,8 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <span class="ticket-total-val" id="t-total">— 枚</span>
   </div>
   <div style="background:#1a1a1a;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
-    <span style="font-size:14px;color:#aaa" id="sales-label">チケット（×¥1,500）</span>
+    <span style="font-size:14px;color:#aaa" id="sales-label">販売金額（×¥1,500）</span>
     <span style="font-size:26px;font-weight:500" id="t-sales">— 円</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;background:#f9f9f7;border:1px solid #e8e8e4;border-radius:12px;padding:10px 14px">
-    <span style="font-size:14px;color:#555;white-space:nowrap;flex-shrink:0">💳 クレジット</span>
-    <input type="number" class="ticket-input" id="t-credit" placeholder="0" min="0" style="flex:1;text-align:right" oninput="ticketUpdate()">
-    <span style="font-size:13px;color:#888;flex-shrink:0">円</span>
-  </div>
-  <div style="background:#085041;color:#fff;border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
-    <span style="font-size:14px;color:rgba(255,255,255,0.6)">合計売上</span>
-    <span style="font-size:26px;font-weight:500" id="t-grand">— 円</span>
   </div>
   <button class="reset" onclick="resetTicket()">リセット</button>
 </div>
@@ -252,8 +243,14 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
     <div class="ctrl"><input type="number" id="fcnt-500" placeholder="0" min="0" oninput="updateFinal()"></div>
     <span class="subtotal" id="fst-500">¥0</span>
   </div>
+  <div class="denom-row" style="border:1px solid #dde4f5;background:#f2f4fc">
+    <div class="icon" style="background:#dde4f5;color:#3355cc;font-size:10px;font-weight:700;letter-spacing:-0.5px">C/C</div>
+    <div class="label"><div class="label-name">💳 クレジット</div></div>
+    <div class="ctrl"><input type="number" id="credit-amount" placeholder="0" min="0" oninput="updateFinal()"></div>
+    <span class="subtotal" id="credit-sub">¥0</span>
+  </div>
   <div class="total-box">
-    <span class="total-label">締め合計</span>
+    <span class="total-label">現金 + クレジット</span>
     <span class="total-val" id="final-total">¥0</span>
   </div>
   <div class="diff-box" id="diff-box">
@@ -346,8 +343,8 @@ async function saveToday(){
   const cntB=parseInt(document.getElementById('cnt-b').value)||0;
   const now=new Date();
   const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  const creditAmount=parseInt(document.getElementById('t-credit').value)||0;
-  const record={date:today,ticketTotal:currentTicketTotal,ticketSales:currentTicketTotal*ticketPrice,creditAmount,salesAmount:(currentTicketTotal*ticketPrice)+creditAmount,salesPrice:ticketPrice,foreignVisitors:cntA+cntB,cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},cashTotal:currentCashPrepTotal,finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),bundles:JSON.parse(JSON.stringify(bundles)),curHistory:JSON.parse(JSON.stringify(curHistory)),cntA,cntB,updatedAt:timeStr};
+  const creditAmount=parseInt(document.getElementById('credit-amount').value)||0;
+  const record={date:today,ticketTotal:currentTicketTotal,creditAmount,salesAmount:(currentTicketTotal*ticketPrice)+creditAmount,salesPrice:ticketPrice,foreignVisitors:cntA+cntB,cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},cashTotal:currentCashPrepTotal,finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),bundles:JSON.parse(JSON.stringify(bundles)),curHistory:JSON.parse(JSON.stringify(curHistory)),cntA,cntB,updatedAt:timeStr};
   try{await fbdb.ref(FB_PATH+'/'+today).set(record);document.getElementById('save-bar').textContent='✓ '+timeStr+' に自動保存';}
   catch(e){document.getElementById('save-bar').textContent='⚠️ 保存失敗';}
 }
@@ -362,7 +359,7 @@ async function loadDateData(key){
     if(rec.bundles){bundles=rec.bundles;}
     if(rec.curHistory){curHistory=rec.curHistory;}
     if(rec.salesPrice){ticketPrice=rec.salesPrice;}
-    if(rec.creditAmount!=null){document.getElementById('t-credit').value=rec.creditAmount||'';}
+    if(rec.creditAmount!=null){document.getElementById('credit-amount').value=rec.creditAmount||'';}
     if(rec.updatedAt){document.getElementById('save-bar').textContent='✓ '+rec.updatedAt+' に自動保存';}
     return true;
   }catch(e){return false;}
@@ -482,13 +479,16 @@ function resetCash(){
 const finalDenoms=[10000,5000,1000,500];
 function valF(d){return Math.max(0,parseInt(document.getElementById('fcnt-'+d).value)||0)}
 function updateFinal(){
-  let total=0;
+  let cashTotal=0;
   finalDenoms.forEach(d=>{
     const n=valF(d),sub=n*d;
-    total+=sub;
+    cashTotal+=sub;
     document.getElementById('fst-'+d).textContent=fmt(sub);
     document.getElementById('fsub-'+d).textContent=n+'枚';
   });
+  const credit=Math.max(0,parseInt(document.getElementById('credit-amount').value)||0);
+  document.getElementById('credit-sub').textContent=fmt(credit);
+  const total=cashTotal+credit;
   document.getElementById('final-total').textContent=fmt(total);
   const diff=total-currentCashPrepTotal;
   const diffEl=document.getElementById('diff-val');
@@ -519,6 +519,8 @@ function resetFinal(){
     document.getElementById('fst-'+d).textContent='¥0';
     document.getElementById('fsub-'+d).textContent='0枚';
   });
+  document.getElementById('credit-amount').value='';
+  document.getElementById('credit-sub').textContent='¥0';
   document.getElementById('final-total').textContent='¥0';
   document.getElementById('diff-val').textContent='¥0';
   document.getElementById('diff-calc').textContent='¥0 − ¥0';
@@ -552,21 +554,23 @@ function renderBundles(){
     const count=(s!=null&&l!=null&&l>s)?(l-s)+'枚':'—';
     const div=document.createElement('div');
     div.className='bundle';
+    const countHTML=(b.start!=null&&b.last!=null&&b.last>b.start)
+      ?`${b.last-b.start}<span style="font-size:17px;font-weight:400;color:#aaa;margin-left:3px">枚</span>`
+      :`<span style="color:#ddd;font-weight:300">—</span>`;
     div.innerHTML=`
       ${bundles.length>1?`<button class="bundle-del" onclick="removeBundle(${i})">✕</button>`:''}
       <div class="bundle-fields">
-        <div class="bundle-field"><label>スタート</label>
-          <input type="number" class="ticket-input" id="b-start-${i}" placeholder="開始番号" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
+        <div>
+          <div class="bundle-field-label">スタート</div>
+          <input type="number" class="bundle-inp" id="b-start-${i}" placeholder="—" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
         </div>
-        <div class="bundle-field"><label>中間</label>
-          <input type="number" class="ticket-input" id="b-last-${i}" placeholder="現在の番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
+        <div>
+          <div class="bundle-field-label">中間</div>
+          <input type="number" class="bundle-inp" id="b-last-${i}" placeholder="—" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
         </div>
-        <div class="bundle-result">${count}</div>
-        <div class="bundle-btns">
-          <button class="rec-small" onclick="recordBundle(${i})">記録</button>
-          <button class="fin-small" onclick="finalizeBundle(${i})">最終</button>
-        </div>
-      </div>`;
+      </div>
+      <div class="bundle-result">${countHTML}</div>
+      <button class="rec-small" onclick="recordBundle(${i})">記録</button>`;
     container.appendChild(div);
   });
   ticketUpdate();
@@ -576,7 +580,7 @@ function onBundleInput(i){
   bundles[i].last=bundleVal(i,'last');
   const s=bundles[i].start,l=bundles[i].last;
   const resEl=document.getElementById('bundle-list').querySelectorAll('.bundle-result')[i];
-  if(resEl) resEl.textContent=(s!=null&&l!=null&&l>s)?(l-s)+'枚':'—';
+  if(resEl) resEl.innerHTML=(s!=null&&l!=null&&l>s)?`${l-s}<span style="font-size:17px;font-weight:400;color:#aaa;margin-left:3px">枚</span>`:`<span style="color:#ddd;font-weight:300">—</span>`;
   ticketUpdate();
 }
 function prevNum(idx){
@@ -632,7 +636,6 @@ function removeHistory(i){
 function ticketUpdate(){
   const totalEl=document.getElementById('t-total');
   const salesEl=document.getElementById('t-sales');
-  const grandEl=document.getElementById('t-grand');
   let total=0,hasAny=false;
   bundles.forEach(b=>{
     if(b.start!=null&&b.last!=null&&b.last>b.start){
@@ -641,19 +644,12 @@ function ticketUpdate(){
     }
   });
   currentTicketTotal=hasAny?total:0;
-  const credit=parseInt(document.getElementById('t-credit').value)||0;
-  const ticketSales=currentTicketTotal*ticketPrice;
   if(hasAny){
     totalEl.textContent=total+'枚';
-    salesEl.textContent='¥'+ticketSales.toLocaleString('ja-JP');
+    salesEl.textContent='¥'+(total*ticketPrice).toLocaleString('ja-JP');
   } else {
     totalEl.textContent='— 枚';
     salesEl.textContent='— 円';
-  }
-  if(hasAny||credit>0){
-    grandEl.textContent='¥'+(ticketSales+credit).toLocaleString('ja-JP');
-  } else {
-    grandEl.textContent='— 円';
   }
   autoSave();
 }
@@ -665,8 +661,8 @@ function resetTicket(){
   document.getElementById('t-history').innerHTML='';
   document.getElementById('t-total').textContent='— 枚';
   document.getElementById('t-sales').textContent='— 円';
-  document.getElementById('t-credit').value='';
-  document.getElementById('t-grand').textContent='— 円';
+  document.getElementById('credit-amount').value='';
+
   addBundle();
   autoSave();
 }
