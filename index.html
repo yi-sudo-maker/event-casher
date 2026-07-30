@@ -9,15 +9,14 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;background:#f5f5f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1rem;gap:1rem}
 .card{background:#fff;border-radius:16px;padding:1.5rem;width:100%;max-width:420px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
 h1{font-size:16px;font-weight:500;color:#888;margin-bottom:1.25rem}
-/* トップバー */
 .top-bar{width:100%;max-width:420px;display:flex;justify-content:space-between;align-items:center;padding-top:0.25rem}
 .today-date{font-size:17px;font-weight:700;color:#1a1a1a}
 .top-right{display:flex;gap:8px;align-items:center}
 .data-link{font-size:13px;color:#7F77DD;text-decoration:none;padding:6px 12px;border-radius:8px;background:#EEEDFE;white-space:nowrap}
 .save-bar{width:100%;max-width:420px;font-size:11px;color:#aaa;text-align:right;margin-top:-0.5rem}
-/* 準備金 */
 .denom-row{display:flex;align-items:center;gap:10px;background:#f9f9f7;border:1px solid #e8e8e4;border-radius:10px;padding:10px 12px;margin-bottom:8px}
 .icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.icon-10000{background:#E8F5E9;color:#1B5E20}
 .icon-5000{background:#EEEDFE;color:#3C3489}
 .icon-1000{background:#E1F5EE;color:#085041}
 .icon-500{background:#FAEEDA;color:#633806}
@@ -33,7 +32,6 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .total-label{font-size:14px;color:#aaa}
 .total-val{font-size:28px;font-weight:500}
 .reset{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;background:transparent;color:#999;font-size:14px;cursor:pointer;font-family:inherit}
-/* チケット */
 .ticket-input{font-size:16px;font-weight:500;border:1px solid #ddd;border-radius:8px;padding:8px 10px;color:#1a1a1a;-moz-appearance:textfield;width:100%}
 .ticket-input::-webkit-inner-spin-button,.ticket-input::-webkit-outer-spin-button{-webkit-appearance:none}
 .ticket-input:focus{outline:none;border-color:#7F77DD}
@@ -60,10 +58,13 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 .ticket-total-label{font-size:14px;color:rgba(255,255,255,0.6)}
 .ticket-total-val{font-size:28px;font-weight:500}
 .divider{border:none;border-top:1px solid #eee;margin:0.5rem 0 0.75rem}
-/* 設定ボタン */
+.diff-box{border-radius:12px;padding:1rem 1.4rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;border:2px solid #e0e0e0;transition:border-color 0.2s,background 0.2s}
+.diff-left{display:flex;flex-direction:column;gap:2px}
+.diff-sub{font-size:11px;color:#aaa}
+.diff-calc{font-size:11px;color:#bbb}
+.diff-val{font-size:28px;font-weight:700;color:#1a1a1a;transition:color 0.2s}
 .settings-fab{position:fixed;top:14px;right:14px;width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,0.12);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:100;color:#666}
 .settings-fab:active{transform:scale(0.93)}
-/* 設定モーダル */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:#fff;border-radius:20px 20px 0 0;padding:1.5rem;width:100%;max-width:480px;animation:slideUp 0.25s ease}
@@ -84,10 +85,8 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
 </head>
 <body>
 
-<!-- 設定ボタン -->
 <button class="settings-fab" onclick="openSettings()" title="設定">⚙️</button>
 
-<!-- 設定モーダル -->
 <div class="modal-overlay" id="settings-overlay" onclick="overlayClick(event)">
   <div class="modal">
     <div class="modal-header">
@@ -105,7 +104,6 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   </div>
 </div>
 
-<!-- トップバー -->
 <div class="top-bar">
   <span class="today-date" id="today-date-display"></span>
   <div class="top-right">
@@ -120,25 +118,19 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <div class="denom-row">
     <div class="icon icon-5000">5000</div>
     <div class="label"><div class="label-name">5,000円</div><div class="label-count" id="sub-5000">0枚</div></div>
-    <div class="ctrl">
-      <input type="number" id="cnt-5000" placeholder="0" min="0" oninput="update()">
-    </div>
+    <div class="ctrl"><input type="number" id="cnt-5000" placeholder="0" min="0" oninput="update()"></div>
     <span class="subtotal" id="st-5000">¥0</span>
   </div>
   <div class="denom-row">
     <div class="icon icon-1000">1000</div>
     <div class="label"><div class="label-name">1,000円</div><div class="label-count" id="sub-1000">0枚</div></div>
-    <div class="ctrl">
-      <input type="number" id="cnt-1000" placeholder="0" min="0" oninput="update()">
-    </div>
+    <div class="ctrl"><input type="number" id="cnt-1000" placeholder="0" min="0" oninput="update()"></div>
     <span class="subtotal" id="st-1000">¥0</span>
   </div>
   <div class="denom-row">
     <div class="icon icon-500">500</div>
     <div class="label"><div class="label-name">500円</div><div class="label-count" id="sub-500">0枚</div></div>
-    <div class="ctrl">
-      <input type="number" id="cnt-500" placeholder="0" min="0" oninput="update()">
-    </div>
+    <div class="ctrl"><input type="number" id="cnt-500" placeholder="0" min="0" oninput="update()"></div>
     <span class="subtotal" id="st-500">¥0</span>
   </div>
   <div class="total-box">
@@ -170,7 +162,7 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <button class="reset" onclick="resetTicket()">リセット</button>
 </div>
 
-<!-- カウンター カード -->
+<!-- 外国人カウンター カード -->
 <div class="card">
   <h1>外国人カウンター</h1>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -190,11 +182,52 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <button class="reset" onclick="resetCnt()">リセット</button>
 </div>
 
+<!-- 売上集計（締め）カード -->
+<div class="card">
+  <h1>売上集計（締め）</h1>
+  <div class="denom-row">
+    <div class="icon icon-10000">万</div>
+    <div class="label"><div class="label-name">10,000円</div><div class="label-count" id="fsub-10000">0枚</div></div>
+    <div class="ctrl"><input type="number" id="fcnt-10000" placeholder="0" min="0" oninput="updateFinal()"></div>
+    <span class="subtotal" id="fst-10000">¥0</span>
+  </div>
+  <div class="denom-row">
+    <div class="icon icon-5000">5000</div>
+    <div class="label"><div class="label-name">5,000円</div><div class="label-count" id="fsub-5000">0枚</div></div>
+    <div class="ctrl"><input type="number" id="fcnt-5000" placeholder="0" min="0" oninput="updateFinal()"></div>
+    <span class="subtotal" id="fst-5000">¥0</span>
+  </div>
+  <div class="denom-row">
+    <div class="icon icon-1000">1000</div>
+    <div class="label"><div class="label-name">1,000円</div><div class="label-count" id="fsub-1000">0枚</div></div>
+    <div class="ctrl"><input type="number" id="fcnt-1000" placeholder="0" min="0" oninput="updateFinal()"></div>
+    <span class="subtotal" id="fst-1000">¥0</span>
+  </div>
+  <div class="denom-row">
+    <div class="icon icon-500">500</div>
+    <div class="label"><div class="label-name">500円</div><div class="label-count" id="fsub-500">0枚</div></div>
+    <div class="ctrl"><input type="number" id="fcnt-500" placeholder="0" min="0" oninput="updateFinal()"></div>
+    <span class="subtotal" id="fst-500">¥0</span>
+  </div>
+  <div class="total-box">
+    <span class="total-label">締め合計</span>
+    <span class="total-val" id="final-total">¥0</span>
+  </div>
+  <div class="diff-box" id="diff-box">
+    <div class="diff-left">
+      <span class="diff-sub">差額（締め − 準備金）</span>
+      <span class="diff-calc" id="diff-calc">¥0 − ¥0</span>
+    </div>
+    <span class="diff-val" id="diff-val">¥0</span>
+  </div>
+  <button class="reset" onclick="resetFinal()">リセット</button>
+</div>
+
 <script>
-/* ===== データ永続化 ===== */
-const DB_KEY = 'event-casher-records';
-let currentTicketTotal = 0;
-let saveTimer = null;
+const DB_KEY='event-casher-records';
+let currentTicketTotal=0;
+let currentCashPrepTotal=0;
+let saveTimer=null;
 
 function getTodayKey(){
   const d=new Date();
@@ -206,7 +239,7 @@ function getTodayDisplay(){
   return (d.getMonth()+1)+'月'+d.getDate()+'日（'+days[d.getDay()]+'）';
 }
 function loadAllRecords(){
-  try{ return JSON.parse(localStorage.getItem(DB_KEY))||{}; }catch(e){ return {}; }
+  try{ return JSON.parse(localStorage.getItem(DB_KEY))||{}; }catch(e){ return{}; }
 }
 function autoSave(){
   clearTimeout(saveTimer);
@@ -226,7 +259,9 @@ function saveToday(){
     salesPrice:ticketPrice,
     foreignVisitors:cntA+cntB,
     cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},
-    cashTotal:denoms.reduce((s,d)=>s+val(d)*d,0),
+    cashTotal:currentCashPrepTotal,
+    finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},
+    finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),
     bundles:JSON.parse(JSON.stringify(bundles)),
     curHistory:JSON.parse(JSON.stringify(curHistory)),
     cntA,cntB,
@@ -240,7 +275,6 @@ function loadTodayData(){
   const records=loadAllRecords();
   const rec=records[today];
   if(!rec) return false;
-  // 準備金
   if(rec.cashInputs){
     Object.entries(rec.cashInputs).forEach(([d,n])=>{
       const el=document.getElementById('cnt-'+d);
@@ -248,16 +282,20 @@ function loadTodayData(){
     });
     update();
   }
-  // カウンター
   if(rec.cntA!=null){
     document.getElementById('cnt-a').value=rec.cntA||'';
     document.getElementById('cnt-b').value=rec.cntB||'';
     cntUpdate();
   }
-  // チケット
+  if(rec.finalInputs){
+    Object.entries(rec.finalInputs).forEach(([d,n])=>{
+      const el=document.getElementById('fcnt-'+d);
+      if(el) el.value=n||'';
+    });
+    updateFinal();
+  }
   if(rec.bundles){ bundles=rec.bundles; }
   if(rec.curHistory){ curHistory=rec.curHistory; }
-  // 単価
   if(rec.salesPrice){ ticketPrice=rec.salesPrice; }
   if(rec.updatedAt){
     document.getElementById('save-bar').textContent='✓ '+rec.updatedAt+' に自動保存';
@@ -266,7 +304,7 @@ function loadTodayData(){
 }
 
 /* ===== 設定 ===== */
-let ticketPrice = 1500;
+let ticketPrice=1500;
 function openSettings(){
   document.getElementById('setting-price').value=ticketPrice;
   document.getElementById('settings-overlay').classList.add('open');
@@ -314,7 +352,9 @@ function update(){
     document.getElementById('st-'+d).textContent=fmt(sub);
     document.getElementById('sub-'+d).textContent=n+'枚';
   });
+  currentCashPrepTotal=total;
   document.getElementById('grand-total').textContent=fmt(total);
+  updateFinal();
   autoSave();
 }
 function resetCash(){
@@ -323,14 +363,66 @@ function resetCash(){
     document.getElementById('st-'+d).textContent='¥0';
     document.getElementById('sub-'+d).textContent='0枚';
   });
+  currentCashPrepTotal=0;
   document.getElementById('grand-total').textContent='¥0';
+  updateFinal();
+  autoSave();
+}
+
+/* ===== 売上集計（締め） ===== */
+const finalDenoms=[10000,5000,1000,500];
+function valF(d){return Math.max(0,parseInt(document.getElementById('fcnt-'+d).value)||0)}
+function updateFinal(){
+  let total=0;
+  finalDenoms.forEach(d=>{
+    const n=valF(d),sub=n*d;
+    total+=sub;
+    document.getElementById('fst-'+d).textContent=fmt(sub);
+    document.getElementById('fsub-'+d).textContent=n+'枚';
+  });
+  document.getElementById('final-total').textContent=fmt(total);
+  const diff=total-currentCashPrepTotal;
+  const diffEl=document.getElementById('diff-val');
+  const diffBox=document.getElementById('diff-box');
+  const diffCalc=document.getElementById('diff-calc');
+  diffCalc.textContent=fmt(total)+' − '+fmt(currentCashPrepTotal);
+  if(total===0&&currentCashPrepTotal===0){
+    diffEl.textContent='¥0';
+    diffEl.style.color='#1a1a1a';
+    diffBox.style.borderColor='#e0e0e0';
+    diffBox.style.background='';
+  } else if(diff>=0){
+    diffEl.textContent='+¥'+diff.toLocaleString('ja-JP');
+    diffEl.style.color='#085041';
+    diffBox.style.borderColor='#52b788';
+    diffBox.style.background='#f0faf7';
+  } else {
+    diffEl.textContent='−¥'+(Math.abs(diff)).toLocaleString('ja-JP');
+    diffEl.style.color='#c62828';
+    diffBox.style.borderColor='#e57373';
+    diffBox.style.background='#fff5f5';
+  }
+  autoSave();
+}
+function resetFinal(){
+  finalDenoms.forEach(d=>{
+    document.getElementById('fcnt-'+d).value='';
+    document.getElementById('fst-'+d).textContent='¥0';
+    document.getElementById('fsub-'+d).textContent='0枚';
+  });
+  document.getElementById('final-total').textContent='¥0';
+  document.getElementById('diff-val').textContent='¥0';
+  document.getElementById('diff-calc').textContent='¥0 − ¥0';
+  const diffBox=document.getElementById('diff-box');
+  diffBox.style.borderColor='#e0e0e0';
+  diffBox.style.background='';
+  document.getElementById('diff-val').style.color='#1a1a1a';
   autoSave();
 }
 
 /* ===== チケット ===== */
 let bundles=[];
 let curHistory=[];
-
 function addBundle(){
   bundles.push({start:null,last:null});
   renderBundles();
@@ -347,8 +439,7 @@ function renderBundles(){
   const container=document.getElementById('bundle-list');
   container.innerHTML='';
   bundles.forEach((b,i)=>{
-    const s=bundleVal(i,'start');
-    const l=bundleVal(i,'last');
+    const s=bundleVal(i,'start'),l=bundleVal(i,'last');
     const count=(s!=null&&l!=null&&l>=s)?(l-s)+'枚':'—';
     const div=document.createElement('div');
     div.className='bundle';
@@ -358,12 +449,10 @@ function renderBundles(){
         <button class="bundle-del" onclick="removeBundle(${i})">✕</button>
       </div>
       <div class="bundle-fields">
-        <div class="bundle-field">
-          <label>スタート</label>
+        <div class="bundle-field"><label>スタート</label>
           <input type="number" class="ticket-input" id="b-start-${i}" placeholder="開始番号" value="${b.start!=null?b.start:''}" oninput="onBundleInput(${i})">
         </div>
-        <div class="bundle-field">
-          <label>ラスト</label>
+        <div class="bundle-field"><label>ラスト</label>
           <input type="number" class="ticket-input" id="b-last-${i}" placeholder="最終番号" value="${b.last!=null?b.last:''}" oninput="onBundleInput(${i})">
         </div>
       </div>
@@ -446,12 +535,9 @@ function resetTicket(){
 /* ===== 初期化 ===== */
 document.getElementById('today-date-display').textContent=getTodayDisplay();
 const hadData=loadTodayData();
-// ラベル更新
 document.getElementById('sales-label').textContent='販売金額（×¥'+ticketPrice.toLocaleString('ja-JP')+'）';
-// 読み込んだデータを描画
 renderBundles();
 renderHistory();
-// データがなければ1束目を追加
 if(!hadData) addBundle();
 </script>
 </body>
