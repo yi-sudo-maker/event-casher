@@ -262,6 +262,8 @@ input[type=number]:focus{outline:none;border-color:#7F77DD}
   <button class="close-day-btn" onclick="closeDay()">📋 この日の集計を締める</button>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const DB_KEY='event-casher-records';
 let currentTicketTotal=0;
@@ -269,67 +271,59 @@ let currentCashPrepTotal=0;
 let saveTimer=null;
 let viewDate=new Date();
 
-function dateToKey(d){
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* ===== Firebase ===== */
+const firebaseConfig={apiKey:"AIzaSyCvcHoowW1_8VQaeqp2BYIjAWZjbna33-Q",authDomain:"event-casher.firebaseapp.com",databaseURL:"https://event-casher-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"event-casher",storageBucket:"event-casher.firebasestorage.app",messagingSenderId:"356607254748",appId:"1:356607254748:web:ddae51def3431c83809419"};
+firebase.initializeApp(firebaseConfig);
+const fbdb=firebase.database();
+const FB_PATH='records';
+async function migrateIfNeeded(){
+  const localData=localStorage.getItem(DB_KEY);
+  if(!localData)return;
+  try{
+    const localRecords=JSON.parse(localData)||{};
+    if(!Object.keys(localRecords).length)return;
+    const snap=await fbdb.ref(FB_PATH).get();
+    if(snap.exists())return;
+    await fbdb.ref(FB_PATH).set(localRecords);
+    localStorage.removeItem(DB_KEY);
+  }catch(e){}
 }
-function dateToDisplay(d){
-  const days=['日','月','火','水','木','金','土'];
-  return (d.getMonth()+1)+'月'+d.getDate()+'日（'+days[d.getDay()]+'）';
-}
-function getViewKey(){ return dateToKey(viewDate); }
-function getViewDisplay(){ return dateToDisplay(viewDate); }
-function isToday(){
-  const t=new Date();
-  return viewDate.getFullYear()===t.getFullYear()&&viewDate.getMonth()===t.getMonth()&&viewDate.getDate()===t.getDate();
-}
-function prevDay(){
-  viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()-1);
-  switchDate();
-}
-function nextDay(){
-  viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+1);
-  switchDate();
-}
-function switchDate(){
+
+function dateToKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function dateToDisplay(d){const days=['日','月','火','水','木','金','土'];return(d.getMonth()+1)+'月'+d.getDate()+'日（'+days[d.getDay()]+'）';}
+function getViewKey(){return dateToKey(viewDate);}
+function getViewDisplay(){return dateToDisplay(viewDate);}
+function isToday(){const t=new Date();return viewDate.getFullYear()===t.getFullYear()&&viewDate.getMonth()===t.getMonth()&&viewDate.getDate()===t.getDate();}
+function prevDay(){viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()-1);switchDate();}
+function nextDay(){viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),viewDate.getDate()+1);switchDate();}
+async function switchDate(){
   clearTimeout(saveTimer);
   document.getElementById('today-date-display').textContent=getViewDisplay();
   document.getElementById('next-btn').disabled=false;
   resetAllFields();
-  const had=loadDateData(getViewKey());
+  const had=await loadDateData(getViewKey());
   document.getElementById('sales-label').textContent='販売金額（×¥'+ticketPrice.toLocaleString('ja-JP')+'）';
   renderBundles();
   renderHistory();
-  if(!had) addBundle();
-  if(!had) document.getElementById('save-bar').textContent='';
+  if(!had)addBundle();
+  if(!had)document.getElementById('save-bar').textContent='';
 }
-function loadAllRecords(){
-  try{ return JSON.parse(localStorage.getItem(DB_KEY))||{}; }catch(e){ return{}; }
+async function loadAllRecords(){
+  try{const snap=await fbdb.ref(FB_PATH).get();return snap.exists()?snap.val():{};}catch(e){return{};}
 }
-function autoSave(){
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(saveToday,1200);
-}
+function autoSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToday,1200);}
 function resetAllFields(){
-  denoms.forEach(d=>{
-    document.getElementById('cnt-'+d).value='';
-    document.getElementById('st-'+d).textContent='¥0';
-    document.getElementById('sub-'+d).textContent='0枚';
-  });
+  denoms.forEach(d=>{document.getElementById('cnt-'+d).value='';document.getElementById('st-'+d).textContent='¥0';document.getElementById('sub-'+d).textContent='0枚';});
   currentCashPrepTotal=0;
   document.getElementById('grand-total').textContent='¥0';
-  finalDenoms.forEach(d=>{
-    document.getElementById('fcnt-'+d).value='';
-    document.getElementById('fst-'+d).textContent='¥0';
-    document.getElementById('fsub-'+d).textContent='0枚';
-  });
+  finalDenoms.forEach(d=>{document.getElementById('fcnt-'+d).value='';document.getElementById('fst-'+d).textContent='¥0';document.getElementById('fsub-'+d).textContent='0枚';});
   document.getElementById('final-total').textContent='¥0';
   document.getElementById('diff-val').textContent='¥0';
   document.getElementById('diff-calc').textContent='¥0 − ¥0';
   const diffBox=document.getElementById('diff-box');
   diffBox.style.borderColor='#e0e0e0';diffBox.style.background='';
   document.getElementById('diff-val').style.color='#1a1a1a';
-  document.getElementById('cnt-a').value='';
-  document.getElementById('cnt-b').value='';
+  document.getElementById('cnt-a').value='';document.getElementById('cnt-b').value='';
   document.getElementById('cnt-total').textContent='— 人';
   bundles=[];curHistory=[];currentTicketTotal=0;
   document.getElementById('bundle-list').innerHTML='';
@@ -338,61 +332,30 @@ function resetAllFields(){
   document.getElementById('t-total').textContent='— 枚';
   document.getElementById('t-sales').textContent='— 円';
 }
-function saveToday(){
+async function saveToday(){
   const today=getViewKey();
-  const records=loadAllRecords();
   const cntA=parseInt(document.getElementById('cnt-a').value)||0;
   const cntB=parseInt(document.getElementById('cnt-b').value)||0;
   const now=new Date();
   const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-  records[today]={
-    date:today,
-    ticketTotal:currentTicketTotal,
-    salesAmount:currentTicketTotal*ticketPrice,
-    salesPrice:ticketPrice,
-    foreignVisitors:cntA+cntB,
-    cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},
-    cashTotal:currentCashPrepTotal,
-    finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},
-    finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),
-    bundles:JSON.parse(JSON.stringify(bundles)),
-    curHistory:JSON.parse(JSON.stringify(curHistory)),
-    cntA,cntB,
-    updatedAt:timeStr
-  };
-  localStorage.setItem(DB_KEY,JSON.stringify(records));
-  document.getElementById('save-bar').textContent='✓ '+timeStr+' に自動保存';
+  const record={date:today,ticketTotal:currentTicketTotal,salesAmount:currentTicketTotal*ticketPrice,salesPrice:ticketPrice,foreignVisitors:cntA+cntB,cashInputs:{'5000':val(5000),'1000':val(1000),'500':val(500)},cashTotal:currentCashPrepTotal,finalInputs:{'10000':valF(10000),'5000':valF(5000),'1000':valF(1000),'500':valF(500)},finalTotal:finalDenoms.reduce((s,d)=>s+valF(d)*d,0),bundles:JSON.parse(JSON.stringify(bundles)),curHistory:JSON.parse(JSON.stringify(curHistory)),cntA,cntB,updatedAt:timeStr};
+  try{await fbdb.ref(FB_PATH+'/'+today).set(record);document.getElementById('save-bar').textContent='✓ '+timeStr+' に自動保存';}
+  catch(e){document.getElementById('save-bar').textContent='⚠️ 保存失敗';}
 }
-function loadDateData(key){
-  const records=loadAllRecords();
-  const rec=records[key];
-  if(!rec) return false;
-  if(rec.cashInputs){
-    Object.entries(rec.cashInputs).forEach(([d,n])=>{
-      const el=document.getElementById('cnt-'+d);
-      if(el) el.value=n||'';
-    });
-    update();
-  }
-  if(rec.cntA!=null){
-    document.getElementById('cnt-a').value=rec.cntA||'';
-    document.getElementById('cnt-b').value=rec.cntB||'';
-    cntUpdate();
-  }
-  if(rec.finalInputs){
-    Object.entries(rec.finalInputs).forEach(([d,n])=>{
-      const el=document.getElementById('fcnt-'+d);
-      if(el) el.value=n||'';
-    });
-    updateFinal();
-  }
-  if(rec.bundles){ bundles=rec.bundles; }
-  if(rec.curHistory){ curHistory=rec.curHistory; }
-  if(rec.salesPrice){ ticketPrice=rec.salesPrice; }
-  if(rec.updatedAt){
-    document.getElementById('save-bar').textContent='✓ '+rec.updatedAt+' に自動保存';
-  }
-  return true;
+async function loadDateData(key){
+  try{
+    const snap=await fbdb.ref(FB_PATH+'/'+key).get();
+    if(!snap.exists())return false;
+    const rec=snap.val();
+    if(rec.cashInputs){Object.entries(rec.cashInputs).forEach(([d,n])=>{const el=document.getElementById('cnt-'+d);if(el)el.value=n||'';});update();}
+    if(rec.cntA!=null){document.getElementById('cnt-a').value=rec.cntA||'';document.getElementById('cnt-b').value=rec.cntB||'';cntUpdate();}
+    if(rec.finalInputs){Object.entries(rec.finalInputs).forEach(([d,n])=>{const el=document.getElementById('fcnt-'+d);if(el)el.value=n||'';});updateFinal();}
+    if(rec.bundles){bundles=rec.bundles;}
+    if(rec.curHistory){curHistory=rec.curHistory;}
+    if(rec.salesPrice){ticketPrice=rec.salesPrice;}
+    if(rec.updatedAt){document.getElementById('save-bar').textContent='✓ '+rec.updatedAt+' に自動保存';}
+    return true;
+  }catch(e){return false;}
 }
 
 /* ===== 認証 ===== */
@@ -666,14 +629,10 @@ function resetTicket(){
 }
 
 /* ===== 締め ===== */
-function closeDay(){
-  saveToday();
+async function closeDay(){
+  await saveToday();
   const key=getViewKey();
-  const records=loadAllRecords();
-  if(records[key]){
-    records[key].closed=true;
-    localStorage.setItem(DB_KEY,JSON.stringify(records));
-  }
+  await fbdb.ref(FB_PATH+'/'+key+'/closed').set(true);
   const bar=document.getElementById('save-bar');
   bar.textContent='✅ '+getViewDisplay()+' の集計を締めました';
   bar.style.color='#085041';
@@ -681,14 +640,18 @@ function closeDay(){
 }
 
 /* ===== 初期化 ===== */
-initAuth();
-document.getElementById('today-date-display').textContent=getViewDisplay();
-document.getElementById('next-btn').disabled=false;
-const hadData=loadDateData(getViewKey());
-document.getElementById('sales-label').textContent='販売金額（×¥'+ticketPrice.toLocaleString('ja-JP')+'）';
-renderBundles();
-renderHistory();
-if(!hadData) addBundle();
+async function init(){
+  initAuth();
+  await migrateIfNeeded();
+  document.getElementById('today-date-display').textContent=getViewDisplay();
+  document.getElementById('next-btn').disabled=false;
+  document.getElementById('sales-label').textContent='販売金額（×¥'+ticketPrice.toLocaleString('ja-JP')+'）';
+  const hadData=await loadDateData(getViewKey());
+  renderBundles();
+  renderHistory();
+  if(!hadData)addBundle();
+}
+init();
 </script>
 </body>
 </html>
