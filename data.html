@@ -88,16 +88,11 @@ h2{font-size:14px;font-weight:600;color:#888;margin-bottom:1rem}
   <div id="table-area"><div class="empty">データがありません</div></div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyCvcHoowW1_8VQaeqp2BYIjAWZjbna33-Q",authDomain:"event-casher.firebaseapp.com",databaseURL:"https://event-casher-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"event-casher",storageBucket:"event-casher.firebasestorage.app",messagingSenderId:"356607254748",appId:"1:356607254748:web:ddae51def3431c83809419"};
-firebase.initializeApp(firebaseConfig);
-const fbdb=firebase.database();
-const FB_PATH='records';
+const DB_KEY='event-casher-records';
 
-async function loadRecords(){
-  try{const snap=await fbdb.ref(FB_PATH).get();return snap.exists()?snap.val():{};}catch(e){return{};}
+function loadRecords(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY))||{};}catch(e){return{};}
 }
 function fmtDate(key){
   const [y,m,d]=key.split('-');
@@ -109,14 +104,16 @@ function fmtNum(n){
   if(n==null||isNaN(n)) return '—';
   return n.toLocaleString('ja-JP');
 }
-async function deleteRecord(key){
+function deleteRecord(key){
   if(!confirm(fmtDate(key)+'のデータを削除しますか？')) return;
-  await fbdb.ref(FB_PATH+'/'+key).remove();
+  const records=loadRecords();
+  delete records[key];
+  localStorage.setItem(DB_KEY,JSON.stringify(records));
   render();
 }
 
-async function render(){
-  const records=await loadRecords();
+function render(){
+  const records=loadRecords();
   const keys=Object.keys(records).sort();
 
   if(keys.length===0){
